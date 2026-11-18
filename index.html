@@ -470,9 +470,9 @@ function render(){
   if(u) nb.insertAdjacentHTML('beforeend', `<span class="badge">${u}</span>`);
   $('meBtn').innerHTML = `<span class="av">${esc(initials(miNombre()))}</span>`;
 }
-function tarjeta(r, conQuien=true){ const T = TIPOS[tipoDe(r)];
+function tarjeta(r, conQuien=true, conDia=false){ const T = TIPOS[tipoDe(r)];
   return `<button class="n${tipoDe(r)==='urgente'?' urg':''}" style="--c:${T.c}" onclick="ver('${esc(r.id)}')">
-    <div class="n-h">${conQuien?`<b>${esc(nombreDe(quienDe(r)))}</b>`:''}<span class="t">${r.sistema?'🚪 Egreso':T.i+' '+T.l}</span><span class="hora">${conQuien?'':relDay(r.fecha)+' · '}${fh(r.fecha)}</span></div>
+    <div class="n-h">${conQuien?`<b>${esc(nombreDe(quienDe(r)))}</b>`:''}<span class="t">${r.sistema?'🚪 Egreso':T.i+' '+T.l}</span><span class="hora">${!conQuien||conDia?relDay(r.fecha)+' · ':''}${fh(r.fecha)}</span></div>
     <p>${esc(r.texto)}</p><small>${r.sistema ? 'Desde la app de Internos' : '✍️ ' + esc(r.operador)}${r.editado ? ' · corregida' : ''}</small></button>`;
 }
 function porDia(lista, conQuien){ let h = '', last = '';
@@ -481,11 +481,14 @@ function porDia(lista, conQuien){ let h = '', last = '';
 /* ======== 1) BITÁCORA: muro con todo, del más nuevo al más viejo ======== */
 function vMuro(){
   let L = notas(); if(V.filtro!=='todo') L = L.filter(r => tipoDe(r)===V.filtro);
-  const hoy = notas().filter(r => !r.sistema && dayDiff(new Date(), r.fecha)===0).length, tot = L.length;
-  L = L.slice(0, 120);
+  const hoy = notas().filter(r => !r.sistema && dayDiff(new Date(), r.fecha)===0).length;
+  // Lo urgente de la semana de guardia va siempre arriba de todo; el resto, en orden
+  const wk = weekRange(0), arriba = V.filtro==='todo' ? L.filter(r => tipoDe(r)==='urgente' && inRange(r.fecha, wk)) : [];
+  L = L.filter(r => !arriba.includes(r)); const tot = L.length; L = L.slice(0, 120);
   return `<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
   <div class="chips">${[['todo','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i+' '+t.l])].map(([k,l]) => `<button class="chip${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()">${l}</button>`).join('')}</div>
-  ${porDia(L, true) || '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>'}
+  ${arriba.length ? `<div class="grp u">⚠ Urgente esta semana (${arriba.length})</div>${arriba.map(r => tarjeta(r, true, true)).join('')}<div class="grp">Todas las novedades</div>` : ''}
+  ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>')}
   ${tot > 120 ? '<p class="nota">Se muestran las 120 más nuevas. Lo de antes está en el historial de cada interno.</p>' : ''}`;
 }
 
@@ -582,7 +585,7 @@ function vViernes(){
   <button class="b wa grande" onclick="copiar()">📋 Copiar resumen para WhatsApp</button>
   <div class="grp u">⚠ Urgente</div>
   ${W.bajas.map(p => `<div class="n urg" style="--c:var(--urg)"><div class="n-h"><b>${esc(p.nombre)}</b><span class="t">🚪 Egreso</span><span class="hora">${fDate(p.baja)}</span></div><p>${esc(p.estado)} (desde la app de Internos)</p></div>`).join('')}
-  ${W.urg.map(r => tarjeta(r)).join('') || (W.bajas.length ? '' : '<div class="vacio">Nada urgente esta semana 👍</div>')}
+  ${W.urg.map(r => tarjeta(r, true, true)).join('') || (W.bajas.length ? '' : '<div class="vacio">Nada urgente esta semana 👍</div>')}
   <div class="grp">👤 Por interno</div>
   ${W.porInt.map(x => `<div class="bl"><b>${esc(x.p.nombre)}${x.p.estado!=='Activo' ? ' <span class="est">' + esc(x.p.estado) + '</span>' : ''}</b>${x.L.map(ln).join('')}</div>`).join('') || '<div class="vacio">Sin novedades de internos.</div>'}
   ${W.sin.length ? `<div class="ayuda">Sin nada anotado esta semana: <b>${W.sin.map(p => esc(p.nombre)).join(', ')}</b>.</div>` : ''}
