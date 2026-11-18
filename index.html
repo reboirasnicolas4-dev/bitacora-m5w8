@@ -153,6 +153,10 @@ a.b{display:block}
 .chk input:checked+span{background:var(--int);border-color:var(--int)}.chk input:checked+span::after{content:'✓';display:grid;place-items:center;height:100%;color:#10210f;font-weight:800;font-size:18px}
 .tt{flex:1;min-width:0;background:none;border:0;text-align:left;color:var(--ink);padding:0}.tt b{display:block;font-size:15.5px;font-weight:600}.tt small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
 body.confab .app{padding-bottom:190px}
+.filtros{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;margin-bottom:12px}
+.fi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 2px 6px;font:600 11.5px "Hanken Grotesk",sans-serif;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fi span{font-size:17px;line-height:1.1}
+.fi.on{background:var(--acc);border-color:var(--acc);color:var(--accx)}
 </style>
 </head>
 <body>
@@ -515,7 +519,7 @@ function vMuro(){
   const wk = weekRange(0), arriba = V.filtro==='todo' ? L.filter(r => tipoDe(r)==='urgente' && inRange(r.fecha, wk)) : [];
   L = L.filter(r => !arriba.includes(r)); const tot = L.length; L = L.slice(0, 120);
   return `${cartelAvisos()}<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
-  <div class="chips">${[['todo','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i+' '+t.l])].map(([k,l]) => `<button class="chip${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()">${l}</button>`).join('')}</div>
+  <div class="filtros">${[['todo','📋','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i, t.l])].map(([k,i,l]) => `<button class="fi${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()"><span>${i}</span>${l}</button>`).join('')}</div>
   ${arriba.length ? `<div class="grp u">⚠ Urgente esta semana (${arriba.length})</div>${arriba.map(r => tarjeta(r, true, true)).join('')}<div class="grp">Todas las novedades</div>` : ''}
   ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>')}
   ${tot > 120 ? '<p class="nota">Se muestran las 120 más nuevas. Lo de antes está en el historial de cada interno.</p>' : ''}`;
