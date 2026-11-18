@@ -12,114 +12,123 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>/* Estilo de las apps de Alas (Médicos y Despensa): fondo oscuro, tarjetas marrones, acento naranja */
-:root{--bg:#16120e;--card:#211b15;--card2:#2b241d;--line:#3a3027;--ink:#f0e8da;--mut:#b3a99b;--acc:#f7a823;--accx:#281a08;--soft:#3a2a12;--ok:#8fd19e;--blue:#8db4ff;--red:#ff8f7a}
+<style>
+:root{--bg:#16120e;--card:#211b15;--card2:#2b241d;--line:#3a3027;--ink:#f0e8da;--mut:#b3a99b;--acc:#f7a823;--accx:#281a08;--soft:#3a2a12;
+  --urg:#ff7a5c;--fam:#a9a3ff;--int:#7fcf8f;--com:#e0b26a}
 *{box-sizing:border-box}[hidden]{display:none!important}html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:15.5px/1.4 "Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;-webkit-text-size-adjust:100%}
-button,input,textarea{font:inherit;color:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-#app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:calc(90px + env(safe-area-inset-bottom))}
-.top{position:sticky;top:0;z-index:30;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px}
-.top img{width:36px;height:36px;object-fit:contain}
-.top .t{flex:1;font:700 26px Fraunces,serif;line-height:1}.top .t small{display:block;font:400 12.5px "Hanken Grotesk",sans-serif;color:var(--mut);margin-top:3px}
-.me{border:0;background:none;padding:0}
-.av{width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--acc);display:grid;place-items:center;font-weight:700;font-size:14px}
-.estado{max-width:560px;margin:0 auto 6px;background:var(--soft);border:1px solid var(--acc);border-radius:12px;font-size:14px;padding:9px 12px;text-align:center}
-.estado.err{border-color:var(--red);color:var(--red);background:#2a1512}
-main{padding:4px 14px 16px}
-h1{font:700 24px/1.15 Fraunces,serif;margin:4px 2px 10px}
-.ayuda{border:1px dashed #6a4a16;background:#241a0e;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.45;color:#f3d9a8;margin-bottom:12px}
-.srch{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 12px;margin-bottom:12px}
-.srch input{flex:1;background:none;border:0;color:var(--ink);font:inherit;outline:none;padding:11px 0}
-.grp{font-size:11.5px;font-weight:700;letter-spacing:.07em;color:var(--mut);margin:16px 2px 6px;text-transform:uppercase}
-.grp.rojo{color:var(--acc)}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.4 "Hanken Grotesk",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.app{max-width:560px;margin:0 auto;padding:0 14px 120px}
+.top{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:10px;padding:14px 0 10px}
+.logo{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 60% 40%,#ffb43a,#e2531c 60%,#2a1206 62%);flex:none}
+.top h1{font:700 26px Fraunces,serif;margin:0;line-height:1}.top small{display:block;color:var(--mut);font-size:12.5px;margin-top:3px}
+.tag{font-size:10.5px;font-weight:700;color:var(--accx);background:var(--acc);border-radius:99px;padding:1px 7px;letter-spacing:.03em}
+.ayuda{border:1px dashed #6a4a16;background:#241a0e;border-radius:12px;padding:9px 12px;font-size:13.5px;line-height:1.45;color:#f3d9a8;margin-bottom:12px}
+.grp{font-size:11.5px;font-weight:700;letter-spacing:.07em;color:var(--mut);margin:18px 2px 7px;text-transform:uppercase;display:flex;gap:6px;align-items:center}
+.grp.u{color:var(--urg)}
 .vacio{text-align:center;color:var(--mut);padding:22px 10px;border:1px dashed var(--line);border-radius:14px;font-size:14.5px}
-/* lista de internos */
-.fila{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;color:var(--ink)}
-.fila.u{border-color:var(--acc);background:linear-gradient(90deg,#2e2214,var(--card) 60%)}
-.fila .fn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.fila .fn b{font-size:16px}
-.fila .fn small{color:var(--mut);font-size:12.5px}
-.fila .ult{font-size:13.5px;color:#d8cebf;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fila .ult i{font-style:normal;color:var(--mut)}
-.fila .fl{color:var(--mut);font-size:22px}
-em.ur{font-style:normal;font-size:12px;font-weight:700;color:var(--acc);margin-left:4px}
-.est{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--mut);font-weight:600}
-/* ficha */
-.volver{border:0;background:none;color:var(--acc);font-weight:700;font-size:15.5px;padding:4px 0;margin-bottom:4px}
-.ficha-h h1{margin:2px 2px 2px}.ficha-h p{color:var(--mut);margin:0 2px 12px;font-size:14px}
-.paso{font:700 19px Fraunces,serif;margin:18px 2px 6px;display:flex;align-items:baseline;gap:8px}
-.paso small{font:600 12.5px "Hanken Grotesk",sans-serif;color:var(--mut)}
-.dia-t{font-size:11.5px;font-weight:700;letter-spacing:.07em;color:var(--mut);margin:14px 2px 6px;text-transform:uppercase}
-/* notas */
-.it{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px;margin-bottom:8px;color:var(--ink)}
-.it.urg{border-color:var(--acc);background:linear-gradient(90deg,#2e2214,var(--card) 60%)}
-.it.sys{border-style:dashed;background:transparent}
-.it.anul{opacity:.55}.it.anul p{text-decoration:line-through}
-.it-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.it-top b{font-size:15.5px}
-.cuando{margin-left:auto;color:var(--mut);font-size:12.5px;white-space:nowrap}
-.it p{margin:5px 0 3px;font-size:15px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
-.it small{color:var(--mut);font-size:12px}
-.tag{display:inline-block;background:var(--acc);color:var(--accx);font-size:11.5px;font-weight:700;border-radius:99px;padding:2px 9px}
-.tag.gris{background:var(--card2);color:var(--mut);border:1px solid var(--line)}
-/* botones (como Médicos) */
-.b{background:var(--card2);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px 10px;font:600 14.5px "Hanken Grotesk",sans-serif;text-align:center;text-decoration:none;display:block}
-.b.p{background:var(--acc);color:var(--accx);border-color:var(--acc);font-weight:700}
-.b.full{width:100%;margin-top:8px}.b.grande{padding:15px;font-size:16px}
-.b.red{color:var(--red)}.b.suave{background:transparent;color:var(--mut)}
-.b.wa{background:#1f6b3d;border-color:#2f8a52;color:#fff;font-weight:700}
-.b:disabled{opacity:.6}
-.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.btns .full{grid-column:1/-1;margin:0}
-/* calendario (como Despensa) */
-.cal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px}
-.mesh{display:flex;align-items:center;gap:8px;margin-bottom:8px}.mesh h2{flex:1;margin:0;font:700 19px Fraunces,serif;text-align:center}
-.ic{background:var(--card2);border:1px solid var(--line);border-radius:12px;color:var(--mut);padding:8px 13px;font:600 16px inherit}
-.mes{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
-.mes .h{color:var(--mut);font-size:10.5px;text-align:center;font-weight:700;padding:2px 0}
-.mes button{height:44px;border-radius:9px;background:var(--card2);border:1px solid transparent;color:var(--ink);font-weight:600;font-size:13.5px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-.mes button i{display:block;width:6px;height:6px;border-radius:50%}
-.mes button i.si{background:var(--ink);opacity:.7}.mes button i.ur{background:var(--acc)}
-.mes button.v{visibility:hidden}.mes button.hoy{border-color:var(--acc)}.mes button.sel{background:var(--acc);color:var(--accx)}.mes button.sel i.si{background:var(--accx)}
-/* viernes */
-.semana{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:4px}
-.semana>div{flex:1;text-align:center}.semana b{display:block;font:700 17px Fraunces,serif}.semana small{color:var(--ok);font-weight:700;font-size:12.5px}
-.semana button{width:42px;height:42px;border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;font-size:19px}.semana button:disabled{opacity:.3}
-.bloque{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:8px}
-.bloque>b{display:block;font-size:15.5px;margin:2px 0 2px}
-.ln{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:8px 0;font-size:14.5px;white-space:pre-line;color:var(--ink)}
-.bloque>.ln:first-child,.bloque>b+.ln{border-top:0}
-.ln span{display:block;color:var(--mut);font-size:12px}
-/* barra de abajo (como Médicos y Despensa) */
-.nav{position:fixed;left:0;right:0;bottom:0;background:#120f0c;border-top:1px solid var(--line);display:flex;justify-content:center;padding:7px 6px calc(10px + env(safe-area-inset-bottom));z-index:35}
-.nav button{position:relative;flex:1;max-width:140px;background:none;border:0;color:var(--mut);font:600 11.5px "Hanken Grotesk",sans-serif;text-align:center}
+/* filtros */
+.chips{display:flex;gap:6px;overflow-x:auto;margin:0 -14px 10px;padding:0 14px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 12px;font-size:13.5px;font-weight:600;color:var(--mut)}
+.chip.on{background:var(--acc);border-color:var(--acc);color:var(--accx)}
+/* tarjeta de nota (muro) */
+.n{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.n.urg{background:linear-gradient(90deg,#2e1a14,var(--card) 65%);border-color:#5a2a1e;border-left-color:var(--urg)}
+.n-h{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.n-h b{font-size:15px}
+.t{font-size:11.5px;font-weight:700;border-radius:99px;padding:1px 8px;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.hora{margin-left:auto;color:var(--mut);font-size:12.5px}
+.n p{margin:5px 0 3px;white-space:pre-line;font-size:15px}
+.n small{color:var(--mut);font-size:12px}
+.n.anul{opacity:.5}.n.anul p{text-decoration:line-through}
+/* botón flotante gigante */
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:74px;width:min(532px,calc(100% - 28px));padding:16px;border-radius:16px;border:0;background:var(--acc);color:var(--accx);font:700 17px "Hanken Grotesk",sans-serif;box-shadow:0 10px 30px #000a;z-index:6}
+/* barra de abajo */
+.nav{position:fixed;left:0;right:0;bottom:0;background:#120f0c;border-top:1px solid var(--line);display:flex;justify-content:center;padding:7px 6px 10px;z-index:6}
+.nav button{position:relative;flex:1;max-width:140px;background:none;border:0;color:var(--mut);font:600 11.5px "Hanken Grotesk",sans-serif}
 .nav button i{display:block;font-style:normal;font-size:19px;line-height:28px;width:52px;margin:0 auto 2px;border-radius:99px}
 .nav button.on{color:var(--ink)}.nav button.on i{background:#3a2c18}
-.badge{position:absolute;top:-3px;left:calc(50% + 12px);background:var(--acc);color:var(--accx);font-size:11px;font-weight:700;border-radius:999px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center}
-/* ventana de abajo (como Médicos) */
-.sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
-.backdrop{position:absolute;inset:0;background:#000b}
-.sheet{position:relative;background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:22px 22px 0 0;border-top:1px solid var(--line);padding:18px 16px calc(22px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+.badge{position:absolute;top:-3px;left:calc(50% + 12px);background:var(--urg);color:#1b0d09;font-size:11px;font-weight:700;border-radius:99px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center}
+/* internos */
+.sync{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:13.5px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--int);box-shadow:0 0 0 4px #1d3322;flex:none}
+.sync div{flex:1;line-height:1.3}.sync span{color:var(--mut)}
+.srch{display:flex;gap:8px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0 12px;margin-bottom:10px}
+.srch input{flex:1;background:none;border:0;outline:none;padding:11px 0;color:var(--ink)}
+.f{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:7px;color:var(--ink)}
+.f .x{flex:1;min-width:0}.f b{display:block;font-size:15.5px}
+.f small{display:block;color:var(--mut);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.f .cnt{font-size:12px;color:var(--mut);text-align:right;white-space:nowrap}.f .cnt b{font-size:15px;color:var(--ink)}
+.f .pu{width:9px;height:9px;border-radius:50%;background:var(--urg);flex:none}
+.ini{width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13.5px;color:var(--acc);flex:none}
+.b{background:var(--card2);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px 10px;font-weight:600;font-size:14.5px;text-align:center;width:100%}
+.b.p{background:var(--acc);border-color:var(--acc);color:var(--accx);font-weight:700}
+.b.wa{background:#1f6b3d;border-color:#2f8a52;color:#fff;font-weight:700}
+.b.s{background:transparent;color:var(--mut)}
+.b:disabled{opacity:.45}
+/* viernes */
+.sem{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:10px;text-align:center}
+.sem b{font:700 18px Fraunces,serif;display:block}.sem span{color:var(--mut);font-size:13px}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.kp div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 10px}.kp b{font:700 22px Fraunces,serif;display:block}.kp span{font-size:12px;color:var(--mut)}
+.bl{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.bl>b{display:block;font-size:15px;margin-bottom:2px}
+.ln{border-top:1px solid var(--line);padding:7px 0;font-size:14.5px}.bl>b+.ln,.bl>.ln:first-child{border-top:0}
+.ln span{color:var(--mut);font-size:12px;display:block}
+/* panel (hoja de abajo) */
+.sheet-wrap{position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;z-index:9}.backdrop{position:absolute;inset:0;background:#000b}
+.sh{position:relative;background:var(--card);border-radius:22px 22px 0 0;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;padding:16px 16px 22px;border-top:1px solid var(--line);animation:up .2s ease-out}
 @keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
-.sheet h2{margin:0 0 2px;font:700 22px Fraunces,serif}.sheet .sub{color:var(--mut);margin:0 0 12px;font-size:13.5px}
-.lbl{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--mut);text-transform:uppercase;margin:12px 0 6px}
-textarea{width:100%;min-height:160px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16.5px;color:var(--ink);resize:vertical;outline:none;color-scheme:dark}
-textarea:focus,.srch:focus-within,.nuevo input:focus,.inp:focus{border-color:var(--acc)}
-.urgbox{display:flex;gap:12px;align-items:flex-start;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
-.urgbox input{width:24px;height:24px;flex:none;accent-color:var(--acc);margin:0}
-.urgbox b{display:block;color:var(--acc)}.urgbox small{display:block;color:var(--mut);font-size:13px;margin-top:2px}
-.urgbox:has(input:checked){border-color:var(--acc);background:var(--soft)}
-.texto{white-space:pre-line;font-size:16.5px;line-height:1.5;background:var(--card2);border-radius:14px;padding:13px;margin-top:8px}
-.texto.tachado{text-decoration:line-through;opacity:.7}
+.shh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.shh h2{flex:1;margin:0;font:700 22px Fraunces,serif;line-height:1.15}.shh h2 small{display:block;font:500 13px "Hanken Grotesk",sans-serif;color:var(--mut);margin-top:2px}
+.xx{width:38px;height:38px;border-radius:12px;background:var(--card2);border:1px solid var(--line);color:var(--mut)}
+.paso{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--mut);text-transform:uppercase;margin:14px 0 7px;display:flex;gap:6px;align-items:center}
+.paso i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--soft);color:var(--acc);display:grid;place-items:center;font-size:11.5px}
+.quien{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.op{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:10px 6px;font-weight:600;font-size:14px;color:var(--mut)}
+.op.on{border-color:var(--acc);color:var(--ink);background:var(--soft)}
+.lista{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-height:150px;overflow-y:auto}
+.nm{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:7px 12px;font-size:14px;color:var(--ink)}
+.nm.on{background:var(--acc);border-color:var(--acc);color:var(--accx);font-weight:700}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tp{background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:11px 8px;font-weight:700;font-size:14.5px;color:var(--mut);text-align:left;display:flex;gap:8px;align-items:center}
+.tp.on{border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--card2))}
+.txt{position:relative}
+textarea{width:100%;min-height:120px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 50px 12px 12px;font-size:16px;color:var(--ink);outline:none;resize:vertical}
+textarea:focus{border-color:var(--acc)}
+.mic{position:absolute;right:8px;top:8px;width:38px;height:38px;border-radius:50%;background:var(--soft);border:1px solid #6a4a16;font-size:17px}
+.mic.on{background:var(--urg);border-color:var(--urg);animation:pl 1s infinite}
+@keyframes pl{50%{opacity:.6}}
+.hist{margin-top:18px;border-top:1px solid var(--line);padding-top:4px}
+.toast{position:fixed;left:50%;bottom:140px;transform:translateX(-50%) translateY(10px);background:#f0e8da;color:#1b140d;padding:10px 16px;border-radius:12px;font-weight:600;z-index:20;max-width:90%;text-align:center;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateX(-50%)}
+.sel{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px;color:var(--ink);margin-top:8px}
+.dia{font-size:11.5px;font-weight:700;letter-spacing:.07em;color:var(--mut);margin:16px 2px 7px;text-transform:uppercase}
+
+/* extras de la app real */
+.n{display:block;width:100%;text-align:left;color:var(--ink);font:inherit}
+.top img{width:36px;height:36px;object-fit:contain}
+.me{border:0;background:none;padding:0}
+.av{width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--acc);display:grid;place-items:center;font-weight:700;font-size:14px}
+.estado{max-width:560px;margin:0 auto 8px;background:var(--soft);border:1px solid var(--acc);border-radius:12px;font-size:14px;padding:9px 12px;text-align:center}
+.estado.err{border-color:var(--urg);color:var(--urg);background:#2a1512}
+.b.grande{padding:15px;font-size:16px;margin-top:12px}.b.red{color:var(--urg)}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.err{color:var(--urg);font-weight:600;font-size:14px;margin:8px 2px 0;display:none}
+.texto{white-space:pre-line;font-size:16px;line-height:1.5;background:var(--card2);border-radius:14px;padding:13px}
 .antes{margin-top:10px;font-size:13.5px;color:var(--mut)}.antes summary{cursor:pointer;color:var(--acc);font-weight:600}.antes div{white-space:pre-line;background:var(--card2);border-radius:10px;padding:10px;margin-top:6px}
-.err{color:var(--red);font-weight:600;font-size:14px;margin:10px 2px 0;display:none}
 .confirmar{background:#2a1512;border:1px solid #6a2c20;border-radius:12px;padding:12px;margin-top:12px;font-size:14.5px}
+.nota{color:var(--mut);font-size:13.5px;margin:8px 2px}
+.otro{width:100%;margin-top:8px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);outline:none}
+.sem{display:flex;align-items:center;gap:8px}.sem>div{flex:1}.sem button{width:42px;height:42px;border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;font-size:19px}.sem button:disabled{opacity:.3}
+.sem span{display:block}
+.hecha{background:#16261a;border:1px solid #2f4a35;color:var(--int);border-radius:12px;padding:9px 12px;font-weight:600;font-size:14px;margin-bottom:10px;text-align:center}
+.ln{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;font-size:14.5px}
+.f .fl{color:var(--mut);font-size:22px}
+.est{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--mut);font-weight:600}
 .nuevo{display:flex;gap:8px}.nuevo input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--ink);outline:none}
-.nuevo .b{padding:11px 14px}
-.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#f0e8da;color:#1b140d;padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90%;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%)}
-/* ingreso */
+a.b{display:block}
 #splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center}
-.sp-in{display:flex;flex-direction:column;align-items:center;gap:6px}.sp-in b{font:700 20px Fraunces,serif}.sp-in small{color:var(--mut)}
-.sp-in img{width:80px;height:80px;object-fit:contain}
+.sp-in{display:flex;flex-direction:column;align-items:center;gap:6px}.sp-in b{font:700 20px Fraunces,serif}.sp-in small{color:var(--mut)}.sp-in img{width:80px;height:80px;object-fit:contain}
 #login{min-height:100vh;display:grid;place-items:center;padding:20px 18px}
 .lg-box{width:100%;max-width:380px}
 .lg-brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin-bottom:6px}
@@ -157,24 +166,18 @@ textarea:focus,.srch:focus-within,.nuevo input:focus,.inp:focus{border-color:var
   </div>
 </section>
 
-<div id="app" hidden>
-  <header class="top">
-    <img src="logo.png" alt="">
-    <div class="t">Bitácora<small>Alas de Libertad</small></div>
-    <button class="me" id="meBtn" onclick="abrirMenu()" aria-label="Tu usuario"></button>
-  </header>
+<div class="app" id="app" hidden>
+  <div class="top"><img src="logo.png" alt=""><div style="flex:1"><h1>Bitácora</h1><small>Alas de Libertad</small></div><button class="me" id="meBtn" onclick="abrirMenu()" aria-label="Tu usuario"></button></div>
   <div class="estado" id="estado" role="status" hidden></div>
-  <main id="main"></main>
+  <div id="main"></div>
 </div>
+<button class="fab" id="fab" hidden onclick="anotar()">＋ Anotar novedad</button>
 <nav class="nav" id="nav" hidden>
-  <button data-v="internos" onclick="go('internos')"><i>👥</i>Internos</button>
-  <button data-v="registro" onclick="go('registro')"><i>📅</i>Registro</button>
+  <button data-v="muro" class="on" onclick="go('muro')"><i>📝</i>Bitácora</button>
   <button data-v="viernes" onclick="go('viernes')"><i>🗓️</i>Viernes</button>
+  <button data-v="internos" onclick="go('internos')"><i>👥</i>Internos</button>
 </nav>
-<div class="sheet-wrap" id="sheetWrap" hidden>
-  <div class="backdrop" onclick="closeSheet()"></div>
-  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
-</div>
+<div class="sheet-wrap" id="sheetWrap" hidden><div class="backdrop" onclick="closeSheet()"></div><div class="sh" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast"></div>
 <datalist id="dlPersonas"></datalist>
 
@@ -275,7 +278,7 @@ function armar(int, egr, reg, tar, med){
     });
     return { id:String(o.id), fecha:fechaDe(o.fecha), cat: CATS[o.categoria] ? o.categoria : 'general', prio: PRIOS[o.prioridad] ? o.prioridad : 'normal',
       internos, nombres:noms, cedulas:ceds, personal:String(o.personal||''), texto:String(o.texto||''), operador:String(o.operador||''), email:String(o.email||''),
-      editado:String(o.editado||''), anulado:String(o.anulado||''), antes:String(o.antes||''), _fila:o._fila };
+      editado:String(o.editado||''), anulado:String(o.anulado||''), antes:String(o.antes||''), categoria:String(o.categoria||''), quienTipo:String(o.quien||''), _fila:o._fila };
   }).sort((a,b)=>b.fecha-a.fecha);
   // Bajas: una línea automática en la bitácora el día del egreso (no se guarda, se arma de la pestaña Egresados)
   bajas().filter(p=>!p.fantasma && p.baja).forEach(p => REGS.push({ id:'egr:'+p.id, fecha:new Date(p.baja.getFullYear(),p.baja.getMonth(),p.baja.getDate(),8,0), cat:'conducta', prio:'urgente',
@@ -439,231 +442,224 @@ async function borrarFila(hoja, id, log){
   finally { S.ocupado = false; }
 }
 
-/* ============ Pantallas: Internos · Registro · Viernes ============ */
-const V = { view:'internos', intSel:null, verEgr:false, semana:0, cal:null, dia:null, q:'' };
+/* ============ Bitácora: muro · Viernes · Internos ============ */
+const TIPOS = {urgente:{l:'Urgente',i:'⚠',c:'var(--urg)'}, familiar:{l:'Familiar',i:'📞',c:'var(--fam)'}, interno:{l:'Interno',i:'🙂',c:'var(--int)'}, comunidad:{l:'Comunidad',i:'🏠',c:'var(--com)'}};
+const V = { v:'muro', filtro:'todo', q:'', egr:false, semana:0, f:null };
 
-function go(v){ V.view = v; V.intSel = null; render(); window.scrollTo(0,0); }
-function mostrar(app){ $('login').hidden = app; $('app').hidden = !app; $('nav').hidden = !app; }
+function go(v){ V.v = v; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v===v)); $('fab').hidden = false; render(); scrollTo(0,0); }
+function mostrar(app){ $('login').hidden = app; $('app').hidden = !app; $('nav').hidden = !app; $('fab').hidden = !app; }
 function estado(t, err){ const e = $('estado'); e.textContent = t || ''; e.classList.toggle('err', !!err); e.hidden = !t; }
+
+/* ---- cómo se lee cada nota (también las anotadas con la versión anterior) ---- */
+const esReunion = r => r.categoria==='reunion';
+function tipoDe(r){ if(r.sistema || r.prio==='urgente' || r.categoria==='urgente') return 'urgente';
+  if(/^famil/.test(r.categoria)) return 'familiar'; if(r.categoria==='comunidad' || r.categoria==='general') return 'comunidad'; return 'interno'; }
+function quienDe(r){ if(r.internos.length) return r.internos[0];
+  if(r.quienTipo==='operador' || (r.categoria==='equipo' && r.personal)) return 'op:' + (r.personal || 'Equipo'); return 'com'; }
+const nombreDe = q => q==='com' ? '🏠 Comunidad' : q.startsWith('op:') ? '🧑‍💼 ' + q.slice(3) : (BYID[q] ? BYID[q].nombre : '—');
+const notas = () => REGS.filter(r => !r.anulado && !esReunion(r));          // las anuladas quedan guardadas pero no se muestran
+const reuniones = () => REGS.filter(r => esReunion(r) && !r.anulado).sort((a,b) => b.fecha - a.fecha);
+const operadores = () => [...new Set([miNombre(), ...REGS.filter(r => !r.sistema).map(r => r.operador), ...REGS.filter(r => quienDe(r).startsWith('op:')).map(r => r.personal)].filter(Boolean))].sort((a,b) => a.localeCompare(b,'es'));
+const fh = fTime;
 
 function render(){
   if($('app').hidden) return;
-  const m = $('main');
-  if(V.view==='internos') m.innerHTML = V.intSel ? vFicha() : vInternos();
-  if(V.view==='registro') m.innerHTML = vRegistro();
-  if(V.view==='viernes') m.innerHTML = vViernes();
-  document.querySelectorAll('#nav button').forEach(b => { b.classList.toggle('on', b.dataset.v===V.view); b.querySelector('.badge')?.remove(); });
-  const urg = vivas().filter(r => r.prio==='urgente' && !r.sistema && inRange(r.fecha, weekRange(0))).length;
-  if(urg) document.querySelector('#nav [data-v=viernes]').insertAdjacentHTML('beforeend', `<span class="badge">${urg}</span>`);
+  $('main').innerHTML = {muro:vMuro, viernes:vViernes, internos:vInternos}[V.v]();
+  const nb = document.querySelector('#nav [data-v=viernes]'); nb.querySelector('.badge')?.remove();
+  const u = notas().filter(r => tipoDe(r)==='urgente' && !r.sistema && inRange(r.fecha, weekRange(0))).length;
+  if(u) nb.insertAdjacentHTML('beforeend', `<span class="badge">${u}</span>`);
   $('meBtn').innerHTML = `<span class="av">${esc(initials(miNombre()))}</span>`;
 }
-
-/* ---- piezas ---- */
-const vivas = () => REGS.filter(r => !r.anulado);                       // lo anulado no cuenta, pero queda guardado
-const de = id => REGS.filter(r => id==='' ? !r.internos.length : r.internos.includes(id));
-const quien = r => r.internos.length ? r.internos.map(id => BYID[id] ? BYID[id].nombre : '').join(', ') : 'General';
-const hace = d => { const n = dayDiff(new Date(), d); return n===0 ? 'Hoy' : n===1 ? 'Ayer' : n < 7 ? `Hace ${n} días` : fDate(d); };
-function nota(r, conNombre){
-  return `<button class="it ${r.prio==='urgente'&&!r.anulado?'urg':''} ${r.sistema?'sys':''} ${r.anulado?'anul':''}" onclick="ver('${esc(r.id)}')">
-    <div class="it-top">${conNombre?`<b>${esc(quien(r))}</b>`:''}${r.prio==='urgente'&&!r.anulado?'<span class="tag">⚠ Urgente</span>':''}${r.anulado?'<span class="tag gris">Anulada</span>':''}<span class="cuando">${fTime(r.fecha)}</span></div>
-    <p>${esc(r.texto)}</p>
-    <small>${r.sistema ? 'Automático' : esc(r.operador)}${r.editado ? ' · corregida' : ''}</small>
-  </button>`;
+function tarjeta(r, conQuien=true){ const T = TIPOS[tipoDe(r)];
+  return `<button class="n${tipoDe(r)==='urgente'?' urg':''}" style="--c:${T.c}" onclick="ver('${esc(r.id)}')">
+    <div class="n-h">${conQuien?`<b>${esc(nombreDe(quienDe(r)))}</b>`:''}<span class="t">${r.sistema?'🚪 Egreso':T.i+' '+T.l}</span><span class="hora">${conQuien?'':relDay(r.fecha)+' · '}${fh(r.fecha)}</span></div>
+    <p>${esc(r.texto)}</p><small>${r.sistema ? 'Desde la app de Internos' : '✍️ ' + esc(r.operador)}${r.editado ? ' · corregida' : ''}</small></button>`;
 }
-// Notas agrupadas por día (como el registro de Despensa)
-function porDias(lista, conNombre){
-  let h = '', last = '';
-  lista.forEach(r => { const k = midnight(r.fecha).getTime(); if(k!==last){ h += `<div class="dia-t">${relDay(r.fecha)}${dayDiff(new Date(), r.fecha) > 1 ? '' : ' · ' + fDate(r.fecha)}</div>`; last = k; } h += nota(r, conNombre); });
-  return h;
-}
-function filtrar(q){ V.q = q; q = q.trim().toLowerCase(); document.querySelectorAll('[data-n]').forEach(b => b.hidden = !!q && !b.dataset.n.includes(q)); }
+function porDia(lista, conQuien){ let h = '', last = '';
+  lista.forEach(r => { const d = relDay(r.fecha); if(d!==last){ h += `<div class="dia">${d}${d==='Hoy'||d==='Ayer' ? ' · ' + fDate(r.fecha) : ''}</div>`; last = d; } h += tarjeta(r, conQuien); }); return h; }
 
-/* ---- INTERNOS (pantalla principal) ---- */
-function vInternos(){
-  const lista = V.verEgr ? bajas() : activos(), wk = weekRange(0);
-  const ultima = id => vivas().find(r => !r.sistema && (id==='' ? !r.internos.length : r.internos.includes(id)));
-  const fila = (id, nombre, sub) => { const u = ultima(id);
-    const urg = !V.verEgr && vivas().some(r => r.prio==='urgente' && !r.sistema && inRange(r.fecha, wk) && (id==='' ? !r.internos.length : r.internos.includes(id)));
-    return `<button class="fila${urg?' u':''}" data-n="${esc(nombre.toLowerCase())}" onclick="abrir('${esc(id)}')">
-      <span class="fn"><b>${esc(nombre)}${urg ? ' <em class="ur">⚠ urgente</em>' : ''}</b><small>${sub}</small>
-      <span class="ult">${u ? `<i>${hace(u.fecha)}:</i> ${esc(u.texto.slice(0,90))}${u.texto.length>90?'…':''}` : '<i>Todavía no hay nada anotado.</i>'}</span></span><span class="fl">›</span></button>`; };
-  return `
-  ${V.verEgr ? `<button class="volver" onclick="V.verEgr=false;render();scrollTo(0,0)">‹ Volver a los internos</button><h1>Los que ya se fueron</h1>
-    <div class="ayuda">Solo para consultar: todo lo que se anotó de ellos queda guardado.</div>`
-  : `<div class="ayuda">📝 Tocá a un interno para <b>anotar cómo le va</b> o ver <b>todo lo que se anotó</b> de él. Están ordenados por ingreso: el que más tiempo lleva, primero.</div>`}
-  ${lista.length > 8 ? `<div class="srch"><span>🔍</span><input type="search" placeholder="Buscar nombre…" value="${esc(V.q)}" oninput="filtrar(this.value)"></div>` : ''}
-  ${V.verEgr ? '' : fila('', '🏠 General', 'La casa, el equipo, la convivencia')}
-  ${V.verEgr ? '' : `<div class="grp">Internos (${lista.length})</div>`}
-  ${lista.map(p => fila(p.id, p.nombre, V.verEgr ? `<span class="est">${esc(p.estado)}</span>${p.baja ? ' · ' + fDateY(p.baja) : ''}` : (p.ingreso ? `Mes ${mesDe(p.ingreso)} de ${DUR_MESES} · ingresó el ${fDateY(p.ingreso)}` : ''))).join('') || '<div class="vacio">No hay nadie en esta lista.</div>'}
-  ${V.verEgr ? '' : `<button class="b full suave" onclick="V.verEgr=true;V.q='';render();scrollTo(0,0)">Ver los que ya se fueron (${bajas().length})</button>`}`;
-}
-function abrir(id){ V.intSel = id==='' ? '__general' : id; render(); scrollTo(0,0); }
-
-/* ---- FICHA de un interno: anotar + su historial ---- */
-function vFicha(){
-  const gen = V.intSel==='__general', p = gen ? null : BYID[V.intSel];
-  if(!gen && !p){ V.intSel = null; return vInternos(); }
-  const id = gen ? '' : p.id, act = gen || p.estado==='Activo';
-  const notas = de(id), n = notas.filter(r => !r.anulado && !r.sistema).length;
-  return `
-  <button class="volver" onclick="V.intSel=null;render();if(V.q)filtrar(V.q)">‹ Internos</button>
-  <div class="ficha-h">
-    <h1>${gen ? '🏠 General' : esc(p.nombre)}</h1>
-    <p>${gen ? 'La casa, el equipo, la convivencia' : act ? (p.ingreso ? `Mes ${mesDe(p.ingreso)} de ${DUR_MESES} · ingresó el ${fDateY(p.ingreso)}${p.tipo ? ' · ' + esc(p.tipo) : ''}` : '') : `<span class="est">${esc(p.estado)}</span> ${p.baja ? 'el ' + fDateY(p.baja) : ''}`}</p>
-  </div>
-  ${act ? `<button class="b p full grande" onclick="anotar('${esc(id)}')">✏️ Anotar ${gen ? 'algo general' : 'cómo le va a ' + esc(p.nombre.split(' ')[0])}</button>` : ''}
-  <div class="paso">Todo lo anotado <small>${n} nota${n===1?'':'s'}</small></div>
-  ${porDias(notas, false) || '<div class="vacio">Todavía no hay nada anotado.</div>'}`;
+/* ======== 1) BITÁCORA: muro con todo, del más nuevo al más viejo ======== */
+function vMuro(){
+  let L = notas(); if(V.filtro!=='todo') L = L.filter(r => tipoDe(r)===V.filtro);
+  const hoy = notas().filter(r => !r.sistema && dayDiff(new Date(), r.fecha)===0).length, tot = L.length;
+  L = L.slice(0, 120);
+  return `<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
+  <div class="chips">${[['todo','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i+' '+t.l])].map(([k,l]) => `<button class="chip${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()">${l}</button>`).join('')}</div>
+  ${porDia(L, true) || '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>'}
+  ${tot > 120 ? '<p class="nota">Se muestran las 120 más nuevas. Lo de antes está en el historial de cada interno.</p>' : ''}`;
 }
 
-/* ---- Anotar / ver / corregir / anular ---- */
-function anotar(id){
-  const p = id ? BYID[id] : null;
-  openSheet(`
-    <h2>${p ? esc(p.nombre) : '🏠 General'}</h2><p class="sub">${fDate(new Date())} · ${fTime(new Date())} · anota ${esc(miNombre())}</p>
-    <textarea id="aTxt" placeholder="¿Cómo le fue? ¿Qué dijo? ¿Qué pasó? (podés dictar con el 🎤 del teclado)"></textarea>
-    <label class="urgbox"><input type="checkbox" id="aUrg"><span><b>⚠ Es urgente</b><small>Riesgo de que se vaya, problema grave, reclamo fuerte… Sale primero en el resumen del viernes.</small></span></label>
-    <p class="err" id="aErr"></p>
-    <div class="btns"><button class="b" onclick="closeSheet()">Cancelar</button><button class="b p" id="aSave" onclick="guardarNota('${p ? esc(p.id) : ''}')">Guardar</button></div>`);
+/* ======== Anotar: 3 pasos en un solo panel ======== */
+function anotar(pre){
+  const p = pre && BYID[pre];
+  V.f = { ficha: !!p, quien: pre || '', modo: p ? 'int' : '', tipo: p ? 'interno' : '', txt: '' };
+  pintarForm(); $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden';
 }
-async function guardarNota(id, editId){
-  const txt = $('aTxt').value.trim(), err = $('aErr');
-  if(!txt){ err.textContent = 'Escribí qué pasó.'; err.style.display = 'block'; $('aTxt').focus(); return; }
-  const urg = $('aUrg').checked;
-  let rec;
-  if(editId){ const viejo = REGS.find(x => x.id===editId);
-    // al corregir, lo que decía antes queda guardado
-    const antes = (viejo.antes ? viejo.antes + '\n' : '') + `[${aHoja(new Date())} · ${miNombre()}] decía: ${viejo.texto}`;
-    rec = {id:editId, texto:txt, prioridad: urg ? 'urgente' : 'normal', editado: aHoja(new Date()) + ' por ' + miNombre(), antes}; }
-  else { const p = id ? BYID[id] : null;
-    rec = { id:nid('b'), fecha:aHoja(new Date()), categoria: p ? 'conducta' : 'general', prioridad: urg ? 'urgente' : 'normal',
-      internos: p ? p.id : '', nombres: p ? p.nombre : '', cedulas: p ? p.cedula : '', personal:'', texto:txt, operador:miNombre(), email }; }
-  const b = $('aSave'); b.disabled = true; b.textContent = 'Guardando…';
-  try {
-    await guardarFila(HOJA_BIT, rec, editId ? 'Corrigió una nota de la bitácora' : 'Bitácora: ' + (rec.nombres || 'General'), !!editId);
-    const i = RAW.reg.findIndex(x => String(x.id)===rec.id); if(i >= 0) RAW.reg[i] = Object.assign({}, RAW.reg[i], rec); else RAW.reg.push(rec);
-    closeSheet(); armar(); guardarCache(); toast(urg ? '✓ Guardado como urgente' : '✓ Guardado');
-  } catch(e){ err.textContent = errorGuardar(e); err.style.display = 'block'; b.disabled = false; b.textContent = 'Guardar'; }
+function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = operadores();
+  $('sheet').innerHTML = `<div class="shh"><h2>${fijo ? esc(fijo.nombre) + '<small>Anotar novedad</small>' : 'Anotar novedad<small>' + fDate(new Date()) + ' · ' + fh(new Date()) + ' · ' + esc(miNombre()) + '</small>'}</h2><button class="xx" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
+  ${fijo ? '' : `<div class="paso"><i>1</i>¿De quién?</div>
+  <div class="quien">${[['int','👤 Interno'],['com','🏠 General'],['op','🧑‍💼 Operador']].map(([m,l]) => `<button class="op${f.modo===m?' on':''}" onclick="modo('${m}')">${l}</button>`).join('')}</div>
+  ${f.modo==='int' ? `<div class="lista">${activos().map(p => `<button class="nm${f.quien===p.id?' on':''}" onclick="V.f.quien='${esc(p.id)}';pintarForm()">${esc(p.nombre)}</button>`).join('') || '<span class="nota">No hay internos activos.</span>'}</div>` : ''}
+  ${f.modo==='op' ? `<div class="lista">${ops.map(o => `<button class="nm${f.quien==='op:'+o?' on':''}" onclick="V.f.quien='op:'+${JSON.stringify(o).replace(/"/g,'&quot;')};pintarForm()">${esc(o)}</button>`).join('')}</div>
+    <input class="otro" placeholder="Otro operador (escribí el nombre)" value="${f.quien.startsWith('op:') && !ops.includes(f.quien.slice(3)) ? esc(f.quien.slice(3)) : ''}" onchange="V.f.quien=this.value.trim()?'op:'+this.value.trim():'';pintarForm()">` : ''}`}
+  <div class="paso"><i>${fijo?1:2}</i>Tipo</div>
+  <div class="tipos">${Object.entries(TIPOS).map(([k,t]) => `<button class="tp${f.tipo===k?' on':''}" style="--c:${t.c}" onclick="V.f.tipo='${k}';pintarForm()"><span>${t.i}</span>${t.l}</button>`).join('')}</div>
+  <div class="paso"><i>${fijo?2:3}</i>¿Qué pasó?</div>
+  <div class="txt"><textarea id="tx" placeholder="Escribí o tocá 🎤 para dictar" oninput="V.f.txt=this.value;chk()">${esc(f.txt)}</textarea><button class="mic" id="mic" onclick="dictar()" title="Dictar" aria-label="Dictar">🎤</button></div>
+  <p class="err" id="fErr"></p>
+  <button class="b p grande" id="gu" onclick="guardar()">Guardar</button>
+  ${fijo ? historial(fijo.id) : ''}`;
+  chk();
 }
+function modo(m){ V.f.modo = m; V.f.quien = m==='com' ? 'com' : ''; if(m==='com' && !V.f.tipo) V.f.tipo = 'comunidad'; pintarForm(); }
+function chk(){ const f = V.f, b = $('gu'); if(!b) return; const ok = f.quien && f.tipo && f.txt.trim(); b.disabled = !ok;
+  b.textContent = !f.quien ? 'Elegí de quién' : !f.tipo ? 'Elegí el tipo' : !f.txt.trim() ? 'Escribí qué pasó' : 'Guardar'; }
+async function guardar(){
+  const f = V.f, p = BYID[f.quien], op = f.quien.startsWith('op:') ? f.quien.slice(3) : '';
+  const rec = { id:nid('b'), fecha:aHoja(new Date()), categoria:f.tipo, prioridad: f.tipo==='urgente' ? 'urgente' : 'normal',
+    quien: p ? 'interno' : op ? 'operador' : 'general', internos: p ? p.id : '', nombres: p ? p.nombre : '', cedulas: p ? p.cedula : '',
+    personal: op, texto: f.txt.trim(), operador: miNombre(), email };
+  const b = $('gu'); b.disabled = true; b.textContent = 'Guardando…';
+  try { await guardarFila(HOJA_BIT, rec, 'Bitácora: ' + (p ? p.nombre : op ? 'operador ' + op : 'General') + ' · ' + TIPOS[f.tipo].l, false);
+    RAW.reg.push(rec); closeSheet(); armar(); guardarCache(); toast(f.tipo==='urgente' ? '✓ Guardado como urgente' : '✓ Guardado'); }
+  catch(e){ const er = $('fErr'); er.textContent = errorGuardar(e); er.style.display = 'block'; b.disabled = false; b.textContent = 'Guardar'; }
+}
+/* dictado por voz (si el celular lo permite; si no, el 🎤 del teclado) */
+let rec = null;
+function dictar(){ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast('Usá el 🎤 del teclado del celular para dictar'); $('tx').focus(); return; }
+  if(rec){ rec.stop(); return; }
+  try { rec = new SR(); rec.lang = 'es-UY'; rec.interimResults = false; $('mic').classList.add('on');
+    rec.onresult = e => { const t = [...e.results].map(x => x[0].transcript).join(' '); V.f.txt = (V.f.txt ? V.f.txt + ' ' : '') + t; $('tx').value = V.f.txt; chk(); };
+    rec.onend = () => { rec = null; $('mic')?.classList.remove('on'); }; rec.onerror = () => toast('Usá el 🎤 del teclado del celular para dictar'); rec.start(); }
+  catch(e){ rec = null; toast('Usá el 🎤 del teclado del celular para dictar'); } }
+
+/* ======== ver una nota: corregir o anular (nunca se borra) ======== */
 function ver(id){
-  const r = REGS.find(x => x.id===id); if(!r) return;
-  const puede = !r.sistema && !r.anulado && (isAdmin() || (r.email && r.email===email));
-  openSheet(`
-    <h2>${esc(quien(r))}</h2><p class="sub">${fDate(r.fecha)}/${r.fecha.getFullYear()} a las ${fTime(r.fecha)} · ${r.sistema ? 'automático' : 'anotó ' + esc(r.operador)}</p>
-    ${r.prio==='urgente'?'<span class="tag">⚠ Urgente</span>':''}${r.anulado?`<div class="ayuda" style="margin-top:8px">Nota anulada (${esc(r.anulado)}). Queda guardada pero no cuenta en el resumen.</div>`:''}
-    <div class="texto${r.anulado?' tachado':''}">${esc(r.texto)}</div>
-    ${r.editado ? `<p class="sub">Corregida: ${esc(r.editado)}</p>` : ''}
+  const r = REGS.find(x => x.id===id); if(!r) return; const T = TIPOS[tipoDe(r)];
+  const puede = !r.sistema && (isAdmin() || (r.email && r.email===email));
+  $('sheet').innerHTML = `<div class="shh"><h2>${esc(nombreDe(quienDe(r)))}<small>${r.sistema ? '🚪 Egreso' : T.i + ' ' + T.l} · ${fDate(r.fecha)}/${r.fecha.getFullYear()} ${fh(r.fecha)} · ${r.sistema ? 'app de Internos' : esc(r.operador)}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
+    <div class="texto">${esc(r.texto)}</div>
+    ${r.editado ? `<p class="nota">Corregida: ${esc(r.editado)}</p>` : ''}
     ${r.antes ? `<details class="antes"><summary>Ver lo que decía antes</summary><div>${esc(r.antes)}</div></details>` : ''}
-    <p class="err" id="vErr"></p><div id="vDel"></div>
-    <div class="btns">${puede ? `<button class="b red" onclick="confirmarAnular('${esc(r.id)}')">Anular</button><button class="b p" onclick="corregir('${esc(r.id)}')">Corregir</button>` : `<button class="b full" onclick="closeSheet()">Cerrar</button>`}</div>`);
+    <p class="err" id="vErr"></p><div id="vX"></div>
+    ${puede ? `<div class="btns"><button class="b red" onclick="confirmarAnular('${esc(r.id)}')">Anular</button><button class="b" onclick="corregir('${esc(r.id)}')">Corregir</button></div>` : ''}`;
+  $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden';
 }
-function corregir(id){
-  const r = REGS.find(x => x.id===id);
-  openSheet(`
-    <h2>Corregir · ${esc(quien(r))}</h2><p class="sub">Lo que decía antes queda guardado.</p>
-    <textarea id="aTxt">${esc(r.texto)}</textarea>
-    <label class="urgbox"><input type="checkbox" id="aUrg" ${r.prio==='urgente'?'checked':''}><span><b>⚠ Es urgente</b><small>Sale primero en el resumen del viernes.</small></span></label>
-    <p class="err" id="aErr"></p>
-    <div class="btns"><button class="b" onclick="ver('${esc(r.id)}')">Cancelar</button><button class="b p" id="aSave" onclick="guardarNota('', '${esc(r.id)}')">Guardar cambios</button></div>`);
-}
-function confirmarAnular(id){ $('vDel').innerHTML = `<div class="confirmar">¿Anular esta nota? No se borra: queda guardada como anulada.<div class="btns"><button class="b" onclick="$('vDel').innerHTML=''">No</button><button class="b red" onclick="anular('${esc(id)}')">Sí, anular</button></div></div>`; }
-async function anular(id){
-  const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
-  try { await guardarFila(HOJA_BIT, rec, 'Anuló una nota de la bitácora', true);
-    const r = RAW.reg.find(x => String(x.id)===id); if(r) r.anulado = rec.anulado; closeSheet(); armar(); guardarCache(); toast('Nota anulada (queda guardada)'); }
-  catch(e){ $('vErr').textContent = errorGuardar(e); $('vErr').style.display = 'block'; }
-}
+function corregir(id){ const r = REGS.find(x => x.id===id);
+  $('sheet').innerHTML = `<div class="shh"><h2>Corregir<small>Lo que decía antes queda guardado</small></h2><button class="xx" onclick="ver('${esc(id)}')">✕</button></div>
+    <div class="txt"><textarea id="tx">${esc(r.texto)}</textarea></div><p class="err" id="fErr"></p>
+    <button class="b p grande" id="gu" onclick="guardarCorreccion('${esc(id)}')">Guardar cambios</button>`; }
+async function guardarCorreccion(id){ const r = REGS.find(x => x.id===id), txt = $('tx').value.trim(); if(!txt) return;
+  const rec = {id, texto:txt, editado: aHoja(new Date()) + ' por ' + miNombre(), antes: (r.antes ? r.antes + '\n' : '') + `[${aHoja(new Date())} · ${miNombre()}] decía: ${r.texto}`};
+  const b = $('gu'); b.disabled = true; b.textContent = 'Guardando…';
+  try { await guardarFila(HOJA_BIT, rec, 'Corrigió una nota de la bitácora', true); Object.assign(RAW.reg.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('✓ Corregida'); }
+  catch(e){ $('fErr').textContent = errorGuardar(e); $('fErr').style.display = 'block'; b.disabled = false; b.textContent = 'Guardar cambios'; } }
+function confirmarAnular(id){ $('vX').innerHTML = `<div class="confirmar">¿Anular esta nota? No se borra: queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('vX').innerHTML=''">No</button><button class="b red" onclick="anular('${esc(id)}')">Sí, anular</button></div></div>`; }
+async function anular(id){ const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
+  try { await guardarFila(HOJA_BIT, rec, 'Anuló una nota de la bitácora', true); Object.assign(RAW.reg.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('Nota anulada (queda guardada)'); }
+  catch(e){ $('vErr').textContent = errorGuardar(e); $('vErr').style.display = 'block'; } }
 
-/* ---- REGISTRO: calendario, tocás un día y ves todo lo anotado ---- */
-function vRegistro(){
-  const hoy = new Date(); if(!V.cal) V.cal = {y:hoy.getFullYear(), m:hoy.getMonth()}; if(!V.dia) V.dia = midnight(hoy).getTime();
-  const {y, m} = V.cal, off = (new Date(y, m, 1).getDay() + 6) % 7, nd = new Date(y, m + 1, 0).getDate();
-  const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','setiembre','octubre','noviembre','diciembre'];
-  const dias = {}; vivas().forEach(r => { const k = midnight(r.fecha).getTime(); (dias[k] = dias[k] || []).push(r); });
-  let g = ['L','M','M','J','V','S','D'].map(d => `<div class="h">${d}</div>`).join('') + '<button class="v" tabindex="-1" aria-hidden="true"></button>'.repeat(off);
-  for(let d = 1; d <= nd; d++){ const k = new Date(y, m, d).getTime(), l = dias[k] || [];
-    g += `<button class="${k===midnight(hoy).getTime()?'hoy ':''}${k===V.dia?'sel':''}" onclick="V.dia=${k};render()">${d}<i class="${l.length ? (l.some(r=>r.prio==='urgente')?'ur':'si') : ''}"></i></button>`; }
-  const sel = (dias[V.dia] || []).slice().sort((a,b) => a.fecha - b.fecha);
-  return `
-  <div class="ayuda">📅 Tocá un día y ves <b>todo lo que se anotó</b> ese día, de todos. ● hay notas · <span style="color:var(--acc)">●</span> hubo algo urgente.</div>
-  <div class="cal">
-    <div class="mesh"><button class="ic" onclick="V.cal.m--;if(V.cal.m<0){V.cal.m=11;V.cal.y--}render()" aria-label="Mes anterior">‹</button><h2>${MES[m][0].toUpperCase()+MES[m].slice(1)} ${y}</h2><button class="ic" onclick="V.cal.m++;if(V.cal.m>11){V.cal.m=0;V.cal.y++}render()" aria-label="Mes siguiente">›</button></div>
-    <div class="mes">${g}</div>
-  </div>
-  <div class="paso">${relDay(new Date(V.dia))}${dayDiff(new Date(), new Date(V.dia)) > 1 ? '' : ' · ' + fDate(new Date(V.dia))} <small>${sel.length} nota${sel.length===1?'':'s'}</small></div>
-  ${sel.map(r => nota(r, true)).join('') || '<div class="vacio">Ese día no se anotó nada.</div>'}`;
-}
-
-/* ---- VIERNES: resumen de la semana para la reunión ---- */
-function semanaDatos(){
-  const rng = weekRange(V.semana), [s, e] = rng;
-  const regs = vivas().filter(r => inRange(r.fecha, rng)).sort((a,b) => a.fecha - b.fecha);
-  const urg = regs.filter(r => r.prio==='urgente');
-  const resto = regs.filter(r => r.prio!=='urgente');
-  const gente = PERS.filter(p => resto.some(r => r.internos.includes(p.id))).sort(porIngreso).map(p => ({p, regs: resto.filter(r => r.internos.includes(p.id))}));
-  const general = resto.filter(r => !r.internos.length);
-  const sinNada = activos().filter(p => !regs.some(r => r.internos.includes(p.id)));
-  return {s, e, regs, urg, gente, general, sinNada};
+/* ======== 2) VIERNES: la semana de guardia (viernes a viernes) ======== */
+function semana(){
+  const rng = weekRange(V.semana), [s, e] = rng, L = notas().filter(r => !r.sistema && inRange(r.fecha, rng)).sort((a,b) => a.fecha - b.fecha);
+  const urg = L.filter(r => tipoDe(r)==='urgente'), resto = L.filter(r => tipoDe(r)!=='urgente');
+  const porInt = PERS.filter(p => resto.some(r => quienDe(r)===p.id)).sort(porIngreso).map(p => ({p, L: resto.filter(r => quienDe(r)===p.id)}));
+  const com = resto.filter(r => quienDe(r)==='com'), ops = resto.filter(r => quienDe(r).startsWith('op:'));
+  const sin = V.semana===0 ? activos().filter(p => !L.some(r => quienDe(r)===p.id)) : [];
+  const bajas = PERS.filter(p => p.baja && !p.fantasma && inRange(p.baja, rng));
+  const k = toISO(aHoja(s)), cerrada = reuniones().find(r => r.personal===k);
+  return {s, e, L, urg, porInt, com, ops, sin, bajas, k, cerrada};
 }
 function vViernes(){
-  const W = semanaDatos(), enCurso = new Date() >= W.s && new Date() < W.e;
-  const linea = r => `<button class="ln" onclick="ver('${esc(r.id)}')"><span>${fDate(r.fecha)} · ${fTime(r.fecha)}</span>${esc(r.texto)}</button>`;
-  return `
-  <div class="ayuda">🗓️ Lo de la semana <b>de viernes a viernes</b>, para leer en la reunión del cambio de guardia.</div>
-  <div class="semana">
-    <button onclick="V.semana--;render()" aria-label="Semana anterior">‹</button>
-    <div><b>Del ${fDate(W.s)} al ${fDate(W.e)}</b>${enCurso ? '<small>esta semana</small>' : ''}</div>
-    <button onclick="V.semana++;render()" ${V.semana >= 0 ? 'disabled' : ''} aria-label="Semana siguiente">›</button>
-  </div>
-  <button class="b wa full grande" onclick="copiarWA()">📋 Copiar resumen para WhatsApp</button>
-  <div class="grp rojo">⚠ Urgente (${W.urg.length})</div>
-  ${W.urg.map(r => nota(r, true)).join('') || '<div class="vacio">Nada urgente esta semana.</div>'}
-  <div class="grp">Cómo le fue a cada uno</div>
-  ${W.gente.map(g => `<div class="bloque"><b>${esc(g.p.nombre)}${g.p.estado!=='Activo' ? ` <span class="est">${esc(g.p.estado)}</span>` : ''}</b>${g.regs.map(linea).join('')}</div>`).join('') || '<div class="vacio">No se anotó nada de los internos esta semana.</div>'}
-  ${W.sinNada.length && V.semana===0 ? `<div class="ayuda">Sin nada anotado esta semana: <b>${W.sinNada.map(p => esc(p.nombre)).join(', ')}</b>.</div>` : ''}
-  <div class="grp">🏠 General</div>
-  ${W.general.length ? `<div class="bloque">${W.general.map(linea).join('')}</div>` : '<div class="vacio">Sin novedades generales.</div>'}`;
+  const W = semana(), enCurso = new Date() < W.e;
+  const ln = r => `<button class="ln" onclick="ver('${esc(r.id)}')"><span>${TIPOS[tipoDe(r)].i} ${fDate(r.fecha)} · ${fh(r.fecha)} · ${esc(r.operador)}</span>${esc(r.texto)}</button>`;
+  const ant = reuniones().slice(0, 12);
+  return `<div class="ayuda">🗓️ La semana de guardia <b>de viernes a viernes</b>, ordenada para leer en 5 minutos en la reunión. Al terminar, tocá <b>✓ Semana pasada en la reunión</b> y queda guardada.</div>
+  <div class="sem"><button onclick="V.semana--;render()" aria-label="Semana anterior">‹</button><div><b>Del ${fDate(W.s)} al ${fDate(W.e)}</b><span>${enCurso ? 'Semana en curso' : 'Reunión del ' + fDate(W.e)}</span></div><button onclick="V.semana++;render()" ${V.semana>=0?'disabled':''} aria-label="Semana siguiente">›</button></div>
+  ${W.cerrada ? `<div class="hecha">✓ Pasada en la reunión · ${fDate(W.cerrada.fecha)} ${fh(W.cerrada.fecha)} · ${esc(W.cerrada.operador)}</div>` : ''}
+  <div class="kp"><div><b>${W.L.length}</b><span>novedades</span></div><div><b style="color:var(--urg)">${W.urg.length}</b><span>urgentes</span></div><div><b>${W.bajas.length}</b><span>egresos</span></div></div>
+  <button class="b wa grande" onclick="copiar()">📋 Copiar resumen para WhatsApp</button>
+  <div class="grp u">⚠ Urgente</div>
+  ${W.bajas.map(p => `<div class="n urg" style="--c:var(--urg)"><div class="n-h"><b>${esc(p.nombre)}</b><span class="t">🚪 Egreso</span><span class="hora">${fDate(p.baja)}</span></div><p>${esc(p.estado)} (desde la app de Internos)</p></div>`).join('')}
+  ${W.urg.map(r => tarjeta(r)).join('') || (W.bajas.length ? '' : '<div class="vacio">Nada urgente esta semana 👍</div>')}
+  <div class="grp">👤 Por interno</div>
+  ${W.porInt.map(x => `<div class="bl"><b>${esc(x.p.nombre)}${x.p.estado!=='Activo' ? ' <span class="est">' + esc(x.p.estado) + '</span>' : ''}</b>${x.L.map(ln).join('')}</div>`).join('') || '<div class="vacio">Sin novedades de internos.</div>'}
+  ${W.sin.length ? `<div class="ayuda">Sin nada anotado esta semana: <b>${W.sin.map(p => esc(p.nombre)).join(', ')}</b>.</div>` : ''}
+  <div class="grp">🏠 Comunidad</div>${W.com.length ? `<div class="bl">${W.com.map(ln).join('')}</div>` : '<div class="vacio">Sin novedades.</div>'}
+  <div class="grp">🧑‍💼 Operadores</div>${W.ops.length ? `<div class="bl">${W.ops.map(r => ln(r).replace('<span>', '<span>' + esc(r.personal) + ' · ')).join('')}</div>` : '<div class="vacio">Sin novedades.</div>'}
+  ${W.cerrada ? '' : `<button class="b p grande" style="margin-top:16px" onclick="cerrarSemana()">✓ Semana pasada en la reunión</button>`}
+  <div class="grp">🗄️ Reuniones anteriores</div>
+  ${ant.map(r => `<button class="f" onclick="verReunion('${esc(r.id)}')"><span class="x"><b>${esc(r.nombres || 'Reunión')}</b><small>Cerrada el ${fDate(r.fecha)} ${fh(r.fecha)} por ${esc(r.operador)}</small></span><span class="fl">›</span></button>`).join('') || '<div class="vacio">Todavía no se cerró ninguna reunión.</div>'}`;
 }
 function textoWA(){
-  const W = semanaDatos(), corto = n => shortName(n), clip = t => t.length > 220 ? t.slice(0,217).trimEnd() + '…' : t;
-  const q = r => r.internos.length ? r.internos.map(id => corto(BYID[id].nombre)).join(', ') : 'General';
-  const L = [`*ALAS DE LIBERTAD · BITÁCORA*`, `Semana del ${fDate(W.s)} al ${fDate(W.e)}`, ''];
-  L.push('⚠ *URGENTE*'); W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${clip(r.texto)}`)); if(!W.urg.length) L.push('• Nada urgente.');
-  L.push('', '👥 *CÓMO LE FUE A CADA UNO*'); W.gente.forEach(g => { L.push(`*${corto(g.p.nombre)}*`); g.regs.forEach(r => L.push(`– ${fDate(r.fecha)}: ${clip(r.texto)}`)); }); if(!W.gente.length) L.push('• Sin novedades.');
-  L.push('', '🏠 *GENERAL*'); W.general.forEach(r => L.push(`• ${fDate(r.fecha)}: ${clip(r.texto)}`)); if(!W.general.length) L.push('• Sin novedades.');
+  const W = semana(), q = r => { const k = quienDe(r); return k==='com' ? 'Comunidad' : k.startsWith('op:') ? k.slice(3) : shortName(BYID[k] ? BYID[k].nombre : '—'); };
+  const L = ['*ALAS DE LIBERTAD · BITÁCORA*', `Semana del ${fDate(W.s)} al ${fDate(W.e)}`, '', '⚠ *URGENTE*'];
+  W.bajas.forEach(p => L.push(`• *${shortName(p.nombre)}*: egreso (${p.estado}) ${fDate(p.baja)}`));
+  W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${r.texto}`)); if(!W.urg.length && !W.bajas.length) L.push('• Nada urgente.');
+  L.push('', '👤 *POR INTERNO*'); W.porInt.forEach(x => { L.push(`*${shortName(x.p.nombre)}*`); x.L.forEach(r => L.push(`– ${TIPOS[tipoDe(r)].i} ${fDate(r.fecha)}: ${r.texto}`)); }); if(!W.porInt.length) L.push('• Sin novedades.');
+  L.push('', '🏠 *COMUNIDAD*'); W.com.forEach(r => L.push(`• ${fDate(r.fecha)}: ${r.texto}`)); if(!W.com.length) L.push('• Sin novedades.');
+  L.push('', '🧑‍💼 *OPERADORES*'); W.ops.forEach(r => L.push(`• ${r.personal} (${fDate(r.fecha)}): ${r.texto}`)); if(!W.ops.length) L.push('• Sin novedades.');
   return L.join('\n');
 }
-async function copiarWA(){
-  const t = textoWA(); let ok = false;
-  try { await navigator.clipboard.writeText(t); ok = true; } catch(e){}
-  if(ok){ toast('✓ Copiado. Pegalo en el grupo de WhatsApp.'); return; }
-  openSheet(`<h2>Resumen</h2><p class="sub">Mantené apretado el texto, elegí "Seleccionar todo" y "Copiar".</p><textarea readonly style="min-height:360px;font-size:14px">${esc(t)}</textarea><div class="btns"><button class="b full" onclick="closeSheet()">Cerrar</button></div>`);
+async function copiar(){ const t = textoWA();
+  try { await navigator.clipboard.writeText(t); toast('✓ Copiado. Pegalo en el grupo de WhatsApp.'); }
+  catch(e){ $('sheet').innerHTML = `<div class="shh"><h2>Resumen<small>Mantené apretado el texto para copiarlo</small></h2><button class="xx" onclick="closeSheet()">✕</button></div><div class="txt"><textarea readonly style="min-height:360px;font-size:13.5px">${esc(t)}</textarea></div>`; $('sheetWrap').hidden = false; } }
+async function cerrarSemana(){
+  const W = semana();
+  const rec = { id:nid('r'), fecha:aHoja(new Date()), categoria:'reunion', prioridad:'normal', quien:'reunion', internos:'', nombres:`Reunión del ${fDate(W.e)} (semana del ${fDate(W.s)} al ${fDate(W.e)})`,
+    cedulas:'', personal:W.k, texto:textoWA(), operador:miNombre(), email };
+  try { await guardarFila(HOJA_BIT, rec, 'Cerró la semana en la reunión de viernes', false); RAW.reg.push(rec); armar(); guardarCache(); toast('✓ Semana guardada como reunión'); }
+  catch(e){ estado(errorGuardar(e), true); }
 }
+function verReunion(id){ const r = REGS.find(x => x.id===id);
+  $('sheet').innerHTML = `<div class="shh"><h2>${esc(r.nombres)}<small>Cerrada el ${fDate(r.fecha)} ${fh(r.fecha)} por ${esc(r.operador)} · así quedó</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
+    <div class="texto" style="font-size:14.5px">${esc(r.texto).replace(/\*([^*\n]+)\*/g,'<b>$1</b>').replace(/_([^_\n]+)_/g,'<i>$1</i>')}</div>
+    <button class="b wa" style="margin-top:12px" onclick="navigator.clipboard.writeText(${JSON.stringify(r.texto).replace(/"/g,'&quot;')}).then(()=>toast('✓ Copiado'),()=>toast('No se pudo copiar'))">📋 Copiar para WhatsApp</button>`;
+  $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
 
-/* ---- menú del usuario ---- */
+/* ======== 3) INTERNOS: lista que viene sola de la app de Internos ======== */
+function vInternos(){
+  const lista = V.egr ? bajas() : activos(), q = V.q.trim().toLowerCase();
+  const fil = lista.filter(p => !q || (p.nombre + ' ' + p.cedula).toLowerCase().includes(q));
+  return `<div class="sync"><span class="dot"></span><div><b>Conectada a la app de Internos</b><br><span>Las altas y bajas aparecen solas · no se cargan acá</span></div></div>
+  <div class="srch"><span>🔍</span><input placeholder="Buscar interno…" value="${esc(V.q)}" oninput="V.q=this.value;render();const i=document.querySelector('.srch input');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div>
+  ${V.egr ? '<div class="ayuda">🗄️ <b>Archivo:</b> los que ya se fueron. Su historial queda guardado para consultar.</div>' : ''}
+  ${fil.map(p => { const ns = notas().filter(r => !r.sistema && quienDe(r)===p.id), u = ns.find(r => tipoDe(r)==='urgente' && inRange(r.fecha, weekRange(0))), ult = ns[0];
+    return `<button class="f" onclick="fichaDe('${esc(p.id)}')"><span class="ini">${esc(initials(p.nombre))}</span><span class="x"><b>${esc(p.nombre)}</b><small>${V.egr ? esc(p.estado) + (p.baja ? ' · ' + fDate(p.baja) : '') : ult ? relDay(ult.fecha) + ': ' + esc(ult.texto) : 'Sin notas todavía'}</small></span>${u ? '<span class="pu" title="Urgente esta semana"></span>' : ''}<span class="cnt"><b>${ns.length}</b><br>notas</span></button>`; }).join('') || '<div class="vacio">No hay nadie.</div>'}
+  <button class="b s" style="margin-top:8px" onclick="V.egr=!V.egr;V.q='';render();scrollTo(0,0)">${V.egr ? '‹ Volver a los activos' : '🗄️ Ver archivo de egresados (' + bajas().length + ')'}</button>`;
+}
+// Tocás un nombre: se abre el panel con su nombre arriba para escribir; abajo, todo su historial
+function fichaDe(id){ const p = BYID[id];
+  if(p.estado!=='Activo'){ $('sheet').innerHTML = `<div class="shh"><h2>${esc(p.nombre)}<small>${esc(p.estado)}${p.baja ? ' · ' + fDate(p.baja) : ''} · solo consulta</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>${historial(id)}`; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; return; }
+  anotar(id); }
+function historial(id){ const ns = notas().filter(r => quienDe(r)===id), fam = ns.filter(r => tipoDe(r)==='familiar').length;
+  return `<div class="hist"><div class="grp">Historial · ${ns.length} nota${ns.length===1?'':'s'} · ${fam} 📞 familia</div>${porDia(ns, false) || '<div class="vacio">Todavía no hay nada anotado.</div>'}</div>`; }
+
+/* ======== menú del usuario ======== */
 let instalar = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalar = e; });
 window.addEventListener('appinstalled', () => { instalar = null; toast('Bitácora instalada'); });
 function abrirMenu(){
-  openSheet(`
-    <h2>Tu usuario</h2><p class="sub">${esc(email)}${role ? ' · ' + esc(role) : ''}</p>
-    <div class="lbl">Tu nombre en las notas</div>
-    <div class="nuevo"><input id="mNom" value="${esc(miNombre())}" maxlength="40"><button class="b p" onclick="guardarNombre()">Guardar</button></div>
+  $('sheet').innerHTML = `<div class="shh"><h2>Tu usuario<small>${esc(email)}${role ? ' · ' + esc(role) : ''}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
+    <div class="paso">Tu nombre en las notas</div>
+    <div class="nuevo"><input id="mNom" value="${esc(miNombre())}" maxlength="40"><button class="b p" style="width:auto;padding:11px 16px" onclick="guardarNombre()">Guardar</button></div>
     <div style="display:grid;gap:8px;margin-top:18px">
-      ${instalar ? `<button class="b full" onclick="instalarApp()">📲 Instalar en este celular</button>` : ''}
-      <button class="b full" onclick="closeSheet();cargar().then(()=>toast('Actualizado')).catch(e=>estado('No se pudo actualizar: '+e.message,true))">⟳ Actualizar</button>
-      <a class="b full" data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/">Ir a Internos</a>
-      <button class="b full red" onclick="salir()">Salir</button>
-    </div>`);
+      ${instalar ? '<button class="b" onclick="instalarApp()">📲 Instalar en este celular</button>' : ''}
+      <button class="b" onclick="closeSheet();cargar().then(()=>toast('Actualizado')).catch(e=>estado('No se pudo actualizar: '+e.message,true))">⟳ Actualizar</button>
+      <a class="b" data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/" style="text-decoration:none">Ir a Internos</a>
+      <button class="b red" onclick="salir()">Salir</button>
+    </div>`;
+  $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden';
 }
 function guardarNombre(){ const v = $('mNom').value.trim(); if(!v) return; try { localStorage.setItem('alas-bit-nombre', v); } catch(e){} closeSheet(); render(); toast('Vas a figurar como ' + v); }
 async function instalarApp(){ if(!instalar) return; instalar.prompt(); try { await instalar.userChoice; } catch(e){} instalar = null; closeSheet(); }
 function salir(){ closeSheet(); cerrarSesion(); email=''; role=''; RAW.int=[]; RAW.egr=[]; RAW.reg=[]; RAW.tar=[]; PERS=[]; REGS=[]; TAR=[]; $('lmsg').textContent=''; mostrar(false); modoSetup(false); }
 
 function openSheet(html){ $('sheet').innerHTML = html; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
-function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; }
+function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; if(rec){ try { rec.stop(); } catch(e){} } }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
-function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(() => el.classList.remove('show'), 2600); }
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(() => el.classList.remove('show'), 2400); }
 /* ============ Ingreso (igual que Internos y Cuartos) ============ */
 function modoSetup(on, codigo){ $('setup').hidden = !on; $('pwrow').hidden = on; $('coderow').hidden = !(on && codigo); if(!on) $('ncode').value = '';
   $('ltxt').textContent = on ? (codigo ? 'Escribí el código que te pasaron y elegí tu contraseña nueva.' : 'Es tu primera vez: elegí una contraseña para tu usuario.') : 'Ingresá con el mismo correo y contraseña de la app de Internos.';
