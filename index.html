@@ -143,6 +143,7 @@ a.b{display:block}
 .avisos{background:var(--soft);border:1px solid var(--acc);border-radius:14px;padding:12px;margin-bottom:12px}
 .avisos b{display:block;font-size:15.5px;color:var(--acc)}.avisos span{display:block;color:#f3d9a8;font-size:13.5px;margin-top:3px}.avisos .btns{margin-top:10px}
 .egr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}.egr div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 10px}.egr span{display:block;font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.egr b{font-size:15px}
+.tipos.t3{grid-template-columns:repeat(3,1fr)}.tipos.t3 .tp{flex-direction:column;align-items:center;gap:3px;padding:12px 4px;text-align:center}.tipos.t3 .tp span{font-size:20px}
 </style>
 </head>
 <body>
@@ -514,7 +515,10 @@ function anotar(pre){
   V.f = { ficha: !!p, quien: pre || '', modo: p ? 'int' : '', tipo: p ? 'interno' : '', txt: '' };
   pintarForm(); $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden';
 }
-function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = operadores();
+// Qué tipos se pueden elegir según de quién es la nota (Comunidad no va en la ficha de un interno)
+const tiposPara = modo => modo==='int' ? ['urgente','familiar','interno'] : modo==='com' ? ['urgente','comunidad'] : modo==='op' ? ['urgente','comunidad'] : Object.keys(TIPOS);
+function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = operadores(), tps = tiposPara(fijo ? 'int' : f.modo);
+  if(f.tipo && !tps.includes(f.tipo)) f.tipo = '';
   $('sheet').innerHTML = `<div class="shh"><h2>${fijo ? esc(fijo.nombre) + '<small>Anotar novedad</small>' : 'Anotar novedad<small>' + fDate(new Date()) + ' · ' + fh(new Date()) + ' · ' + esc(miNombre()) + '</small>'}</h2><button class="xx" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
   ${fijo ? '' : `<div class="paso"><i>1</i>¿De quién?</div>
   <div class="quien">${[['int','👤 Interno'],['com','🏠 General'],['op','🧑‍💼 Operador']].map(([m,l]) => `<button class="op${f.modo===m?' on':''}" onclick="modo('${m}')">${l}</button>`).join('')}</div>
@@ -522,7 +526,7 @@ function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = ope
   ${f.modo==='op' ? `<div class="lista">${ops.map(o => `<button class="nm${f.quien==='op:'+o?' on':''}" onclick="V.f.quien='op:'+${JSON.stringify(o).replace(/"/g,'&quot;')};pintarForm()">${esc(o)}</button>`).join('')}</div>
     <input class="otro" placeholder="Otro operador (escribí el nombre)" value="${f.quien.startsWith('op:') && !ops.includes(f.quien.slice(3)) ? esc(f.quien.slice(3)) : ''}" onchange="V.f.quien=this.value.trim()?'op:'+this.value.trim():'';pintarForm()">` : ''}`}
   <div class="paso"><i>${fijo?1:2}</i>Tipo</div>
-  <div class="tipos">${Object.entries(TIPOS).map(([k,t]) => `<button class="tp${f.tipo===k?' on':''}" style="--c:${t.c}" onclick="V.f.tipo='${k}';pintarForm()"><span>${t.i}</span>${t.l}</button>`).join('')}</div>
+  <div class="tipos${tps.length===3?' t3':''}">${tps.map(k => [k, TIPOS[k]]).map(([k,t]) => `<button class="tp${f.tipo===k?' on':''}" style="--c:${t.c}" onclick="V.f.tipo='${k}';pintarForm()"><span>${t.i}</span>${t.l}</button>`).join('')}</div>
   <div class="paso"><i>${fijo?2:3}</i>¿Qué pasó?</div>
   <div class="txt"><textarea id="tx" placeholder="Escribí o tocá 🎤 para dictar" oninput="V.f.txt=this.value;chk()">${esc(f.txt)}</textarea><button class="mic" id="mic" onclick="dictar()" title="Dictar" aria-label="Dictar">🎤</button></div>
   <p class="err" id="fErr"></p>
