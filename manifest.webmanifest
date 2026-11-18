@@ -1,0 +1,14 @@
+{
+  "name": "Bitácora Alas de Libertad",
+  "short_name": "Bitácora",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F1EC",
+  "theme_color": "#C2571B",
+  "icons": [
+    {"src": "icon-alas-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-alas-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
