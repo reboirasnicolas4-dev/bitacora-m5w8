@@ -136,6 +136,17 @@ textarea:focus,.buscar:focus,.nuevo input:focus,.inp:focus{border-color:var(--ac
 .lg-rec{display:flex!important;align-items:center;gap:10px;font-size:14px!important}
 .lg-rec input{width:20px;height:20px;accent-color:var(--acc)}
 .muted{color:var(--mut)}.soft{color:var(--mut)}
+/* resumen de lo importante (inicio) */
+.resumen{background:var(--card);border:1px solid var(--acc);border-radius:18px;padding:12px 12px 6px;margin:4px 0 6px}
+.rs-t{font:700 20px Fraunces,serif;margin:2px 4px 8px;display:flex;align-items:baseline;gap:8px}
+.rs-t small{font:600 13px "Hanken Grotesk",sans-serif;color:var(--mut)}
+.rs{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:6px;color:var(--ink);text-decoration:none;font:inherit}
+.rs i{font-style:normal;font-size:20px;line-height:1.2;flex:none;width:24px;text-align:center}
+.rs span{font-size:13.5px;color:var(--mut);line-height:1.35}
+.rs b{display:block;font-size:15.5px;color:var(--ink);margin-bottom:1px}
+.rs.rojo{border-color:#6a4a16;background:linear-gradient(90deg,#2e2214,var(--card2) 70%)}
+.rs.rojo b{color:var(--acc)}
+.rs.azul b{color:var(--blue)}
 </style>
 </head>
 <body>
@@ -480,13 +491,42 @@ function item(r, conNombre=true){
 }
 function filtrarNombres(q){ q = q.trim().toLowerCase(); document.querySelectorAll('[data-n]').forEach(b => b.hidden = !!q && !b.dataset.n.includes(q)); }
 
+/* ---- INICIO: resumen de lo importante ---- */
+function resumenHoy(){
+  const wk = weekRange(0), h0 = midnight(new Date());
+  const urg = REGS.filter(r => r.prio==='urgente' && !r.sistema && inRange(r.fecha, wk));
+  const quienesUrg = [...new Set(urg.map(r => quien(r)))];
+  const meds = MED.filter(t => t.estado==='pendiente' && t.fecha >= h0 && t.fecha < new Date(h0.getTime() + 3*DAY));
+  const fueron = PERS.filter(p => p.baja && !p.fantasma && inRange(p.baja, wk));
+  const pend = TAR.filter(t => t.estado!=='hecho').length;
+  const filas = [];
+  if(urg.length) filas.push(`<button class="rs rojo" onclick="go('viernes')"><i>⚠</i><span><b>${urg.length} urgente${urg.length>1?'s':''} esta semana</b>${esc(quienesUrg.join(', '))}</span></button>`);
+  meds.forEach(t => filas.push(`<div class="rs azul"><i>🩺</i><span><b>${esc(t.nombre)} tiene médico ${cuandoMed(t.fecha)}${t.hora ? ' a las ' + esc(t.hora) : ''}</b>${esc([t.esp, t.lugar].filter(Boolean).join(' · '))}</span></div>`));
+  fueron.forEach(p => filas.push(`<div class="rs"><i>🚪</i><span><b>${esc(p.nombre)} se fue</b>${esc(p.estado)} · ${fDate(p.baja)}</span></div>`));
+  if(pend) filas.push(`<a class="rs" href="#tareas" onclick="event.preventDefault();$('tareas').scrollIntoView({behavior:'smooth'})"><i>📋</i><span><b>${pend} tarea${pend>1?'s':''} de la chacra sin hacer</b>Están acá abajo</span></a>`);
+  return `<div class="resumen"><div class="rs-t">Lo importante <small>${fDate(new Date())}</small></div>
+    ${filas.join('') || '<div class="rs"><i>✅</i><span><b>Todo tranquilo</b>No hay urgentes, médicos cerca ni tareas pendientes.</span></div>'}</div>`;
+}
+function tareasBloque(){
+  const pend = TAR.filter(t => t.estado!=='hecho'), hechos = TAR.filter(t => t.estado==='hecho').slice(-10).reverse();
+  return `<h2 id="tareas">📋 Tareas de la chacra (${pend.length})</h2>
+  <div class="bloque">
+    ${pend.map(t => `<label class="pd"><input type="checkbox" onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('') || '<p class="nota" style="margin:6px 0">No hay tareas pendientes. 👍</p>'}
+    <div class="nuevo"><input id="pNuevo" placeholder="Agregar una tarea…" onkeydown="if(event.key==='Enter')agregarPend()"><button class="btn primary" onclick="agregarPend()">Agregar</button></div>
+  </div>
+  ${hechos.length ? `<button class="btn full suave" onclick="V.verHechos=!V.verHechos;render()">${V.verHechos ? 'Ocultar' : 'Ver'} las últimas hechas (${hechos.length})</button>
+    ${V.verHechos ? `<div class="bloque">${hechos.map(t => `<label class="pd hecho"><input type="checkbox" checked onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('')}</div>` : ''}` : ''}`;
+}
+
 /* ---- INICIO: anotar ---- */
 function vInicio(){
   const act = activos(), wk = weekRange(0);
   const urgDe = id => REGS.some(r => r.prio==='urgente' && !r.sistema && r.internos.includes(id) && inRange(r.fecha, wk));
   const ult = REGS.filter(r => !r.sistema).slice(0, 15);
   return `
-  <h1>¿De quién querés anotar algo?</h1>
+  ${resumenHoy()}
+  ${tareasBloque()}
+  <h1 style="margin-top:26px">¿De quién querés anotar algo?</h1>
   ${act.length > 10 ? `<input class="buscar" type="search" placeholder="🔍 Buscar nombre…" oninput="filtrarNombres(this.value)">` : ''}
   <div class="nombres">
     <button class="nb gen" onclick="anotar('')"><b>🏠 General</b><small>la casa, el equipo, otras cosas</small></button>
@@ -508,7 +548,6 @@ function anotar(id){
       <p class="err" id="aErr"></p>
     </div>
     <div class="sh-foot"><button class="btn primary grande" id="aSave" onclick="guardarNota('${p ? esc(p.id) : ''}')">Guardar</button></div>`);
-  setTimeout(() => $('aTxt')?.focus(), 250);
 }
 async function guardarNota(id, editId){
   const txt = $('aTxt').value.trim(), err = $('aErr');
@@ -598,7 +637,6 @@ function semanaDatos(){
 }
 function vViernes(){
   const W = semanaDatos(), enCurso = new Date() >= W.s && new Date() < W.e;
-  const pend = TAR.filter(t => t.estado!=='hecho'), hechos = TAR.filter(t => t.estado==='hecho').slice(-10).reverse();
   const linea = r => `<button class="ln" onclick="ver('${esc(r.id)}')"><span>${fDate(r.fecha)}</span>${esc(r.texto)}</button>`;
   return `
   <div class="semana">
@@ -622,19 +660,13 @@ function vViernes(){
   <h2>🏠 General</h2>
   ${W.general.length ? `<div class="bloque">${W.general.map(linea).join('')}</div>` : '<div class="vacio">Sin novedades generales.</div>'}
 
-  <h2>📋 Pendientes (${pend.length})</h2>
-  <div class="bloque">
-    ${pend.map(t => `<label class="pd"><input type="checkbox" onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('') || '<p class="nota" style="margin:6px 0">No hay pendientes.</p>'}
-    <div class="nuevo"><input id="pNuevo" placeholder="Agregar un pendiente…" onkeydown="if(event.key==='Enter')agregarPend()"><button class="btn primary" onclick="agregarPend()">Agregar</button></div>
-  </div>
-  ${hechos.length ? `<button class="btn full suave" onclick="V.verHechos=!V.verHechos;render()">${V.verHechos ? 'Ocultar' : 'Ver'} los últimos hechos (${hechos.length})</button>
-    ${V.verHechos ? `<div class="bloque">${hechos.map(t => `<label class="pd hecho"><input type="checkbox" checked onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('')}</div>` : ''}` : ''}`;
+  ${tareasBloque()}`;
 }
 async function agregarPend(){
   const inp = $('pNuevo'), t = inp.value.trim(); if(!t){ inp.focus(); return; }
   const rec = {id:nid('t'), titulo:t, estado:'pendiente', responsable:'', limite:'', origen:'Semana del ' + fDate(weekRange(0)[0]), creada:aHoja(new Date()), creadapor:miNombre()};
   inp.disabled = true;
-  try { await guardarFila(HOJA_TAR, rec, 'Nuevo pendiente: ' + t.slice(0,80), false); RAW.tar.push(rec); armar(); toast('✓ Pendiente agregado'); setTimeout(() => $('pNuevo')?.focus(), 50); }
+  try { await guardarFila(HOJA_TAR, rec, 'Nuevo pendiente: ' + t.slice(0,80), false); RAW.tar.push(rec); armar(); toast('✓ Pendiente agregado');  }
   catch(e){ inp.disabled = false; estado(errorGuardar(e), true); }
 }
 async function marcar(id, hecho){
@@ -652,7 +684,7 @@ function textoWA(){
   L.push('', '🩺 *MÉDICOS*'); W.meds.forEach(t => L.push(`• *${corto(t.nombre)}*: ${medTxt(t)}${estMed(t)}`)); if(!W.meds.length) L.push('• No hay médicos anotados.');
   L.push('', '👥 *POR PERSONA*'); W.gente.forEach(g => { L.push(`*${corto(g.p.nombre)}*`); g.regs.forEach(r => L.push(`– ${fDate(r.fecha)}: ${clip(r.texto)}`)); }); if(!W.gente.length) L.push('• Sin novedades.');
   L.push('', '🏠 *GENERAL*'); W.general.forEach(r => L.push(`• ${fDate(r.fecha)}: ${clip(r.texto)}`)); if(!W.general.length) L.push('• Sin novedades.');
-  const pend = TAR.filter(t => t.estado!=='hecho'); L.push('', '📋 *PENDIENTES*'); pend.forEach(t => L.push(`☐ ${t.titulo}`)); if(!pend.length) L.push('• No hay.');
+  const pend = TAR.filter(t => t.estado!=='hecho'); L.push('', '📋 *TAREAS DE LA CHACRA*'); pend.forEach(t => L.push(`☐ ${t.titulo}`)); if(!pend.length) L.push('• No hay.');
   return L.join('\n');
 }
 async function copiarWA(){
