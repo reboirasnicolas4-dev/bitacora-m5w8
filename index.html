@@ -147,6 +147,12 @@ textarea:focus,.buscar:focus,.nuevo input:focus,.inp:focus{border-color:var(--ac
 .rs.rojo{border-color:#6a4a16;background:linear-gradient(90deg,#2e2214,var(--card2) 70%)}
 .rs.rojo b{color:var(--acc)}
 .rs.azul b{color:var(--blue)}
+.fila .fn{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fila .fn small{font-size:13px}
+.fila em{font-style:normal;font-weight:600}
+.fila em.u{color:var(--acc)}
+.fila em.m{color:var(--blue)}
+.fila span.fn{color:var(--ink);font-size:16px}
 </style>
 </head>
 <body>
@@ -183,7 +189,7 @@ textarea:focus,.buscar:focus,.nuevo input:focus,.inp:focus{border-color:var(--ac
   <main id="main"></main>
 </div>
 <nav class="nav" id="nav" hidden>
-  <button data-v="inicio" onclick="go('inicio')"><span class="ic">✏️</span>Anotar</button>
+  <button data-v="inicio" onclick="go('inicio')"><span class="ic">🏠</span>Inicio</button>
   <button data-v="internos" onclick="go('internos')"><span class="ic">👥</span>Internos</button>
   <button data-v="viernes" onclick="go('viernes')"><span class="ic">📅</span>Viernes</button>
 </nav>
@@ -520,22 +526,14 @@ function tareasBloque(){
 
 /* ---- INICIO: anotar ---- */
 function vInicio(){
-  const act = activos(), wk = weekRange(0);
-  const urgDe = id => REGS.some(r => r.prio==='urgente' && !r.sistema && r.internos.includes(id) && inRange(r.fecha, wk));
-  const ult = REGS.filter(r => !r.sistema).slice(0, 15);
+  const ult = REGS.filter(r => !r.sistema).slice(0, 10);
   return `
   ${resumenHoy()}
+  <button class="btn primary full grande" style="margin-top:14px" onclick="anotar('')">🏠 Anotar algo general</button>
+  <p class="nota" style="margin:8px 4px 0;text-align:center">La casa, el equipo, otras cosas. Para anotar de un interno, andá a <b>Internos</b> y tocá su nombre.</p>
   ${tareasBloque()}
-  <h1 style="margin-top:26px">¿De quién querés anotar algo?</h1>
-  ${act.length > 10 ? `<input class="buscar" type="search" placeholder="🔍 Buscar nombre…" oninput="filtrarNombres(this.value)">` : ''}
-  <div class="nombres">
-    <button class="nb gen" onclick="anotar('')"><b>🏠 General</b><small>la casa, el equipo, otras cosas</small></button>
-    ${act.map(p => { const m = medDe(p.id, midnight(new Date()), new Date(midnight(new Date()).getTime() + 4*DAY))[0];
-      return `<button class="nb" data-n="${esc(p.nombre.toLowerCase())}" onclick="anotar('${esc(p.id)}')"><b>${esc(p.nombre)}</b>${m ? `<small class="med">🩺 médico ${cuandoMed(m.fecha)}</small>` : ''}${urgDe(p.id)?'<span class="punto" title="Tiene algo urgente esta semana"></span>':''}</button>`; }).join('')}
-  </div>
-  ${act.length ? '' : '<div class="vacio">No hay internos activos en la app de Internos.</div>'}
   <h2>Lo último que se anotó</h2>
-  ${ult.map(r => item(r)).join('') || '<div class="vacio">Todavía no hay nada anotado. Tocá un nombre para empezar.</div>'}`;
+  ${ult.map(r => item(r)).join('') || '<div class="vacio">Todavía no hay nada anotado.</div>'}`;
 }
 
 function anotar(id){
@@ -601,10 +599,13 @@ function vInternos(){
   const lista = V.verEgr ? bajas() : activos(), wk = weekRange(0);
   return `
   <h1>${V.verEgr ? 'Los que ya se fueron' : 'Internos'}</h1>
-  <p class="nota">${V.verEgr ? 'Solo para consultar: todo lo que se anotó de ellos queda guardado.' : 'La lista viene sola de la app de Internos. Tocá un nombre para ver todo lo anotado.'}</p>
+  <p class="nota">${V.verEgr ? 'Solo para consultar: todo lo que se anotó de ellos queda guardado.' : 'Tocá un nombre para anotar algo o ver todo lo anotado de esa persona.'}</p>
   ${lista.length > 10 ? `<input class="buscar" type="search" placeholder="🔍 Buscar nombre…" oninput="filtrarNombres(this.value)">` : ''}
-  ${lista.map(p => { const n = REGS.filter(r => r.internos.includes(p.id) && !r.sistema).length, s = REGS.filter(r => r.internos.includes(p.id) && !r.sistema && inRange(r.fecha, wk)).length;
-    return `<button class="fila" data-n="${esc(p.nombre.toLowerCase())}" onclick="V.intSel='${esc(p.id)}';render();scrollTo(0,0)"><b>${esc(p.nombre)}</b><span>${V.verEgr ? esc(p.estado) + (p.baja ? ' · ' + fDateY(p.baja) : '') : (s ? s + ' esta semana' : '')}${V.verEgr ? '' : ''}</span><i>›</i></button>`; }).join('') || '<div class="vacio">No hay nadie en esta lista.</div>'}
+  ${lista.map(p => {
+    const urg = !V.verEgr && REGS.some(r => r.prio==='urgente' && !r.sistema && r.internos.includes(p.id) && inRange(r.fecha, wk));
+    const m = V.verEgr ? null : medDe(p.id, midnight(new Date()), new Date(midnight(new Date()).getTime() + 4*DAY))[0];
+    const sub = V.verEgr ? esc(p.estado) + (p.baja ? ' · ' + fDateY(p.baja) : '') : [urg ? '<em class="u">⚠ urgente</em>' : '', m ? `<em class="m">🩺 médico ${cuandoMed(m.fecha)}</em>` : ''].filter(Boolean).join(' ');
+    return `<button class="fila" data-n="${esc(p.nombre.toLowerCase())}" onclick="V.intSel='${esc(p.id)}';render();scrollTo(0,0)"><span class="fn"><b>${esc(p.nombre)}</b>${sub ? `<small>${sub}</small>` : ''}</span><i>›</i></button>`; }).join('') || '<div class="vacio">No hay nadie en esta lista.</div>'}
   <button class="btn full suave" style="margin-top:14px" onclick="V.verEgr=!V.verEgr;render();scrollTo(0,0)">${V.verEgr ? '‹ Volver a los internos' : `Ver los que ya se fueron (${bajas().length})`}</button>`;
 }
 function vPersona(){
