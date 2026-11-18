@@ -140,6 +140,8 @@ a.b{display:block}
 .btn{border:1px solid var(--line);background:var(--card2);border-radius:12px;padding:13px;font-weight:700;color:var(--ink)}
 .btn.primary{background:var(--acc);border-color:var(--acc);color:var(--accx)}
 .muted{color:var(--mut)}.soft{color:var(--mut)}
+.avisos{background:var(--soft);border:1px solid var(--acc);border-radius:14px;padding:12px;margin-bottom:12px}
+.avisos b{display:block;font-size:15.5px;color:var(--acc)}.avisos span{display:block;color:#f3d9a8;font-size:13.5px;margin-top:3px}.avisos .btns{margin-top:10px}
 </style>
 </head>
 <body>
@@ -401,10 +403,11 @@ async function fsAcceso(forzar){ const k = 'alas-fs-acc', marca = email+'|'+FSC.
 async function fsEscuchar(){
   if(!token || !FSC.datos || FSC.unsubs.length || fsEscuchar.p) return; fsEscuchar.p = 1;
   try { await fsIniciar(); await fsAcceso(false); } catch(e){ fsEscuchar.p = 0; return; }
-  ['internos', 'hoja_'+HOJA_EGR].forEach(id => { let reintento = false;
+  ['internos', 'hoja_'+HOJA_EGR, 'hoja_'+HOJA_BIT].forEach(id => { let reintento = false;
     const c = () => { const u = FSC.db.doc('datos/'+id).onSnapshot(s => { const o = s.data(); if(!o || !Array.isArray(o.d) || !token || !FSC.datos) return;
         const t = o.t && o.t.toMillis ? o.t.toMillis() : 0; if(t && t < FSC.tCarga) return;
         const j = JSON.stringify(o.d); if(FSC.ult[id]===j) return;
+        if(id==='hoja_'+HOJA_BIT){ FSC.ult[id] = j; mezclarBitacora(o.d); return; }
         const antes = activos().map(p=>p.id).join();
         FSC.ult[id] = j; FSC.datos[id] = o.d;
         armar(FSC.datos.internos, FSC.datos['hoja_'+HOJA_EGR], null, null); guardarCache();
@@ -413,6 +416,17 @@ async function fsEscuchar(){
       FSC.unsubs.push(u); }; c(); });
   fsEscuchar.p = 0; }
 setInterval(() => { if(document.visibilityState==='visible') fsEscuchar(); }, 5000);
+// Notas que llegan en tiempo real (de otros celulares): se suman sin perder nada de lo que ya estaba
+function mezclarBitacora(filas){
+  const pos = new Map(RAW.reg.map((r,i) => [String(r.id), i])), nuevas = [];
+  (filas || []).forEach(r => { if(!r || !r.id) return; const k = String(r.id);
+    if(pos.has(k)) RAW.reg[pos.get(k)] = Object.assign({}, RAW.reg[pos.get(k)], r); else { RAW.reg.push(r); nuevas.push(r); } });
+  armar(); guardarCache();
+  const ajenas = nuevas.filter(r => String(r.email||'').toLowerCase()!==email && r.categoria!=='reunion');
+  if(ajenas.length){ const u = ajenas.find(r => r.prioridad==='urgente' || r.categoria==='urgente');
+    toast(u ? '⚠ Urgente: ' + (u.nombres || u.personal || 'Comunidad') + ' · ' + (u.operador||'') : '🆕 Nueva novedad de ' + (ajenas[ajenas.length-1].operador || 'un compañero'));
+    if(u && navigator.vibrate) try { navigator.vibrate([200,100,200]); } catch(e){} }
+}
 function fsSalir(){ try { FSC.unsubs.forEach(u=>u()); } catch(x){} FSC.unsubs = []; FSC.ult = {}; FSC.datos = null;
   try { localStorage.removeItem('alas-fs-acc'); sessionStorage.removeItem('alas-fs-acc'); } catch(x){}
   try { const db = FSC.db; if(db){ db.terminate().then(()=>db.clearPersistence()).catch(()=>{}); } } catch(x){} FSC.db = null; FSC.listo = null; }
@@ -485,7 +499,7 @@ function vMuro(){
   // Lo urgente de la semana de guardia va siempre arriba de todo; el resto, en orden
   const wk = weekRange(0), arriba = V.filtro==='todo' ? L.filter(r => tipoDe(r)==='urgente' && inRange(r.fecha, wk)) : [];
   L = L.filter(r => !arriba.includes(r)); const tot = L.length; L = L.slice(0, 120);
-  return `<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
+  return `${cartelAvisos()}<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
   <div class="chips">${[['todo','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i+' '+t.l])].map(([k,l]) => `<button class="chip${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()">${l}</button>`).join('')}</div>
   ${arriba.length ? `<div class="grp u">⚠ Urgente esta semana (${arriba.length})</div>${arriba.map(r => tarjeta(r, true, true)).join('')}<div class="grp">Todas las novedades</div>` : ''}
   ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>')}
@@ -639,6 +653,30 @@ function fichaDe(id){ const p = BYID[id];
 function historial(id){ const ns = notas().filter(r => quienDe(r)===id), fam = ns.filter(r => tipoDe(r)==='familiar').length;
   return `<div class="hist"><div class="grp">Historial · ${ns.length} nota${ns.length===1?'':'s'} · ${fam} 📞 familia</div>${porDia(ns, false) || '<div class="vacio">Todavía no hay nada anotado.</div>'}</div>`; }
 
+/* ======== Avisos al celular cuando alguien anota algo URGENTE ======== */
+const FB_VAPID = "BMlKSgGNTNQi3bo7ylruO37vO3AtGbYKeLP0ddH4QVl6zUzGj-JDbqLhUKbLBNoXjjnhrcQ5iiiJm_APymRA09I";
+const esIOS = () => /iPhone|iPad/.test(navigator.userAgent);
+const instalada = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const avisosSoportados = () => 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+function avisosOn(){ try { return !!localStorage.getItem('bit-aviso-token') && Notification.permission==='granted'; } catch(e){ return false; } }
+function dispositivo(){ const u = navigator.userAgent; return (/Android/.test(u) ? 'Android' : /iPhone|iPad/.test(u) ? 'iPhone' : /Windows/.test(u) ? 'Windows' : /Mac/.test(u) ? 'Mac' : 'Otro') + (instalada() ? ' · app' : ' · navegador'); }
+async function fbMensajes(){ await cargarJS(FB_JS+'firebase-app-compat.js'); await cargarJS(FB_JS+'firebase-messaging-compat.js'); if(!firebase.apps.length) firebase.initializeApp(FB_CONF); return firebase.messaging(); }
+async function activarAvisos(){
+  if(!avisosSoportados()){ toast(esIOS() && !instalada() ? 'En iPhone primero instalá la app (Compartir → Agregar a inicio) y abrila desde ese ícono.' : 'Este celular no permite avisos.'); return; }
+  try { const p = await Notification.requestPermission(); if(p!=='granted'){ toast('No se dio permiso para los avisos.'); return; }
+    toast('Activando…');
+    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const m = await fbMensajes(), t = await m.getToken({vapidKey:FB_VAPID, serviceWorkerRegistration:reg});
+    const r = await api({action:'avisoBitGuardar', tokenAviso:t, dispositivo:dispositivo()}); if(!r || r.ok!==true) throw new Error((r && r.error) || 'no se guardó');
+    localStorage.setItem('bit-aviso-token', t); closeSheet(); render(); toast('🔔 Avisos activados: te va a llegar lo urgente al instante.');
+  } catch(e){ toast('No se pudieron activar los avisos (' + e.message + ').'); } }
+async function probarAvisos(){ try { const r = await api({action:'avisoBitPrueba', tokenAviso:localStorage.getItem('bit-aviso-token')}); toast(r && r.ok ? 'Te mandé un aviso de prueba 🔔' : 'No se pudo mandar la prueba.'); } catch(e){ toast('No se pudo mandar la prueba.'); } }
+async function desactivarAvisos(){ try { await api({action:'avisoBitQuitar', tokenAviso:localStorage.getItem('bit-aviso-token')}); } catch(e){} try { localStorage.removeItem('bit-aviso-token'); } catch(e){} closeSheet(); render(); toast('Avisos desactivados en este celular.'); }
+function noAhora(){ try { localStorage.setItem('bit-aviso-no', String(Date.now())); } catch(e){} render(); }
+function cartelAvisos(){ let no = 0; try { no = Number(localStorage.getItem('bit-aviso-no') || 0); } catch(e){}
+  if(avisosOn() || Date.now() - no < 7*DAY) return '';
+  return `<div class="avisos"><b>🔔 Enterate al instante de lo urgente</b><span>Activá los avisos y te llega una notificación cada vez que alguien anota algo urgente.</span><div class="btns"><button class="b s" onclick="noAhora()">Ahora no</button><button class="b p" onclick="activarAvisos()">Activar avisos</button></div></div>`; }
+
 /* ======== menú del usuario ======== */
 let instalar = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalar = e; });
@@ -648,6 +686,7 @@ function abrirMenu(){
     <div class="paso">Tu nombre en las notas</div>
     <div class="nuevo"><input id="mNom" value="${esc(miNombre())}" maxlength="40"><button class="b p" style="width:auto;padding:11px 16px" onclick="guardarNombre()">Guardar</button></div>
     <div style="display:grid;gap:8px;margin-top:18px">
+      ${avisosOn() ? '<div class="hecha" style="margin:0">🔔 Avisos de urgentes activados en este celular</div><div class="btns" style="margin:0"><button class="b" onclick="probarAvisos()">Probar aviso</button><button class="b red" onclick="desactivarAvisos()">Desactivar</button></div>' : '<button class="b p" onclick="activarAvisos()">🔔 Activar avisos de urgentes</button>'}
       ${instalar ? '<button class="b" onclick="instalarApp()">📲 Instalar en este celular</button>' : ''}
       <button class="b" onclick="closeSheet();cargar().then(()=>toast('Actualizado')).catch(e=>estado('No se pudo actualizar: '+e.message,true))">⟳ Actualizar</button>
       <a class="b" data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/" style="text-decoration:none">Ir a Internos</a>
