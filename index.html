@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#16120e">
 <meta name="robots" content="noindex">
 <title>Bitácora · Alas de Libertad</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -11,264 +11,131 @@
 <link rel="icon" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
-<style>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>/* Mismo estilo que Médicos y Despensa: fondo oscuro, tarjetas marrones, acento naranja */
+:root{--bg:#16120e;--card:#211b15;--card2:#2b241d;--line:#3a3027;--ink:#f0e8da;--mut:#b3a99b;--acc:#f7a823;--accx:#281a08;--soft:#3a2a12;--ok:#8fd19e;--blue:#8db4ff;--red:#ff8f7a}
 *{box-sizing:border-box}
-:root{
-  --bg:#F4F1EC;--card:#FFFFFF;--ink:#1D1A17;--muted:#5C544D;--soft:#857B73;--line:#E2DBD2;
-  --brand:#C2571B;--brand-d:#8E3E12;--brand-bg:#FBEDE3;--brown:#5B3A22;
-  --c-conducta:#1F5FA8;--c-familia:#7B45B0;--c-equipo:#0E7C72;--c-general:#55702F;
-  --urg:#B42318;--urg-bg:#FDECEA;--imp:#9A5200;--imp-bg:#FFF2D6;--ok:#1E7B3B;--ok-bg:#E5F4EA;
-  --r:16px;
-}
-html,body{margin:0;background:#E7E1D9;color:var(--ink);font-family:'Atkinson Hyperlegible',system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:calc(170px + env(safe-area-inset-bottom))}
-@media(min-width:500px){#app{box-shadow:0 0 0 1px var(--line),0 10px 40px rgba(0,0,0,.08)}}
-
-/* top bar */
-.top{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:12px}
-.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.mark{width:34px;height:34px;border-radius:10px;background:var(--brand);display:grid;place-items:center;flex:none}
-.brand b{display:block;font-size:17px;color:var(--brown);letter-spacing:.1px}
-.brand small{display:block;font-size:12.5px;color:var(--soft)}
-.me{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:4px 10px 4px 4px;font-size:14px}
-.av{width:30px;height:30px;border-radius:50%;background:var(--brown);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none}
-.demo-tag{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--brand-d);background:var(--brand-bg);padding:2px 7px;border-radius:6px}
-
-main{padding:14px 14px 0}
-h1{font-size:22px;margin:4px 2px 12px;color:var(--ink)}
-h2{font-size:19px;margin:0}
-h3{font-size:16px;margin:0}
-.muted{color:var(--muted)}
-.soft{color:var(--soft)}
-.sec-t{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin:22px 4px 10px}
-.sec-t .n{background:var(--line);color:var(--ink);border-radius:999px;padding:0 8px;font-size:12px;letter-spacing:0}
-
-/* guard banner */
-.guard{background:var(--brown);color:#fff;border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:center}
-.guard .ic{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.14);display:grid;place-items:center;flex:none}
-.guard b{display:block;font-size:16.5px}
-.guard span{display:block;font-size:14px;opacity:.88}
-
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:left}
-.stat b{display:block;font-size:24px;line-height:1.1}
-.stat span{font-size:13px;color:var(--muted)}
-.stat.alert b{color:var(--urg)}
-
-/* chips / filters */
-.filters{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 4px;margin:14px -14px 0;padding-left:14px;padding-right:14px;scrollbar-width:none}
-.filters::-webkit-scrollbar{display:none}
-.fchip{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:15px;white-space:nowrap}
-.fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.search{width:100%;margin-top:10px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:16px}
-
-/* registro card */
-.day{font-size:14px;font-weight:700;color:var(--muted);margin:18px 4px 8px;text-transform:capitalize}
-.reg{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--cc);border-radius:14px;padding:12px 14px;margin-bottom:10px}
-.reg.p-urgente{background:#FFFBFA;border-color:#F3C7C1;border-left-color:var(--urg)}
-.reg-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cat{font-size:13.5px;font-weight:700;color:var(--cc)}
-.time{margin-left:auto;font-size:13.5px;color:var(--soft);white-space:nowrap}
-.pb{font-size:12px;font-weight:700;border-radius:6px;padding:2px 7px;white-space:nowrap}
-.pb.urgente{background:var(--urg);color:#fff}
-.pb.importante{background:var(--imp-bg);color:var(--imp)}
-.ints{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.ichip{font-size:13.5px;background:#F1ECE6;border-radius:8px;padding:3px 9px;font-weight:700;color:var(--brown)}
-.ichip.gen{background:#EEF1EA;color:var(--c-general);font-weight:400}
-.ichip.baja{background:#EEE;color:#6b6b6b;text-decoration:line-through}
-.txt{margin:8px 0 0;font-size:16px;color:var(--ink);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
-.reg-f{margin-top:8px;font-size:13.5px;color:var(--soft)}
-.inv{color:var(--c-equipo);font-weight:700}
-.sys{font-size:12px;background:#ECEFF3;color:#3F4B5B;border-radius:6px;padding:2px 7px;font-weight:700}
-
-.empty{text-align:center;color:var(--muted);padding:28px 16px;background:var(--card);border:1px dashed var(--line);border-radius:14px}
-
-/* FAB */
-.fab-wrap{position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom));max-width:480px;margin:0 auto;padding:0 14px;pointer-events:none;z-index:40;display:flex;justify-content:flex-end}
-.fab{pointer-events:auto;border:0;background:var(--brand);color:#fff;font-weight:700;font-size:17.5px;border-radius:999px;padding:16px 22px;box-shadow:0 8px 22px rgba(142,62,18,.35);display:flex;align-items:center;gap:8px}
-.fab:active{transform:scale(.98)}
-
-/* bottom nav */
-.nav{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:35}
-.nav button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:13px;color:var(--soft);position:relative}
-.nav button svg{width:26px;height:26px}
-.nav button.on{color:var(--brand-d);font-weight:700}
-.nav button.on .pill{background:var(--brand-bg)}
-.pill{border-radius:999px;padding:2px 16px;display:grid;place-items:center}
-.badge{position:absolute;top:2px;left:calc(50% + 8px);background:var(--urg);color:#fff;font-size:11px;font-weight:700;border-radius:999px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;border:2px solid #fff}
-.badge.n{background:var(--brown)}
-
-/* sheet */
-.sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
-.sheet-wrap[hidden]{display:none}
-.backdrop{position:absolute;inset:0;background:rgba(29,26,23,.45)}
-.sheet{position:relative;background:var(--bg);width:100%;max-width:480px;max-height:94vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .22s ease-out}
-@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
-.sh-h{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;border-bottom:1px solid var(--line);background:#fff;border-radius:22px 22px 0 0}
-.sh-h h2{flex:1}
-.x{border:0;background:#F1ECE6;width:38px;height:38px;border-radius:50%;font-size:18px}
-.sh-b{padding:14px 16px 18px;overflow-y:auto;flex:1}
-.sh-foot{padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff;display:flex;gap:10px}
-.lbl{display:flex;align-items:baseline;gap:6px;font-weight:700;font-size:15px;margin:16px 2px 8px}
-.lbl:first-child{margin-top:2px}
-.lbl small{font-weight:400;color:var(--soft);font-size:13px}
-.meta-row{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-.meta-row input{border:0;background:#F6F3EF;border-radius:8px;padding:8px;font-size:15px;min-width:0;flex:1}
-.meta-row .who{font-size:14px;color:var(--muted);white-space:nowrap}
-.catgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cbtn{border:2px solid var(--line);background:#fff;border-radius:14px;padding:11px 12px;text-align:left;min-height:74px}
-.cbtn b{display:block;font-size:15px;color:var(--cc)}
-.cbtn span{display:block;font-size:12.5px;color:var(--soft);margin-top:2px;line-height:1.25}
-.cbtn.on{border-color:var(--cc);background:color-mix(in srgb,var(--cc) 8%,#fff);box-shadow:inset 0 0 0 1px var(--cc)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font-size:15px}
-.chip.on{background:var(--brown);border-color:var(--brown);color:#fff;font-weight:700}
-.chip.gen.on{background:var(--c-general);border-color:var(--c-general)}
-.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.seg3 button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px 6px;font-size:15px;font-weight:700}
-.seg3 button.on[data-v=normal],.seg3 button.on[data-v=pendiente]{border-color:var(--ink);background:#F3F0EC}
-.seg3 button.on[data-v=importante],.seg3 button.on[data-v=proceso]{border-color:var(--imp);background:var(--imp-bg);color:var(--imp)}
-.seg3 button.on[data-v=urgente]{border-color:var(--urg);background:var(--urg);color:#fff}
-.seg3 button.on[data-v=hecho]{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
-textarea,.inp,select{width:100%;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:16px}
-textarea{min-height:130px;resize:vertical}
-textarea:focus,.inp:focus,select:focus,.search:focus{outline:3px solid color-mix(in srgb,var(--brand) 30%,transparent);border-color:var(--brand)}
-.hint{font-size:13px;color:var(--soft);margin:6px 2px 0}
-.err{color:var(--urg);font-weight:700;font-size:14px;margin:10px 2px 0;display:none}
-.btn{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:13px 16px;font-weight:700;font-size:16px}
-.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;flex:1}
-.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
-.btn.danger{background:var(--urg);border-color:var(--urg);color:#fff}
-.btn.ghost-d{color:var(--urg)}
-.btn.wa{background:#1F8F4E;border-color:#1F8F4E;color:#fff;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn.full{width:100%}
-.btn.sm{padding:9px 12px;font-size:14.5px;border-radius:11px}
-
-/* internos */
-.tabs{display:grid;grid-template-columns:1fr 1fr;background:#E9E3DB;border-radius:14px;padding:4px;gap:4px}
-.tabs button{border:0;background:none;border-radius:11px;padding:11px 6px;font-weight:700;font-size:15px;color:var(--muted)}
-.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.sync{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:12px 0 4px;font-size:14px}
-.sync .dot{width:10px;height:10px;border-radius:50%;background:var(--ok);flex:none;box-shadow:0 0 0 4px var(--ok-bg)}
-.sync div{flex:1;line-height:1.3}
-.icard{display:flex;width:100%;text-align:left;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
-.ini{width:44px;height:44px;border-radius:50%;background:#EFE6DC;color:var(--brown);display:grid;place-items:center;font-weight:700;flex:none}
-.icard .b{flex:1;min-width:0}
-.icard b{display:block;font-size:16.5px}
-.icard small{display:block;color:var(--muted);font-size:13.5px}
-.icard .r{text-align:right;font-size:13px;color:var(--soft);white-space:nowrap}
-.flag{display:inline-block;background:var(--urg);color:#fff;border-radius:6px;font-size:12px;font-weight:700;padding:2px 7px;margin-top:3px}
-.est{display:inline-block;border-radius:6px;font-size:12.5px;font-weight:700;padding:2px 8px}
-.est.ok{background:var(--ok-bg);color:var(--ok)}
-.est.bad{background:var(--urg-bg);color:var(--urg)}
-.est.neu{background:#ECEFF3;color:#3F4B5B}
-.srow.pulse{animation:pl 1s ease}
-@keyframes pl{0%{background:#FFF3C4}100%{background:#fff}}
-.syncing .dot{background:var(--imp);box-shadow:0 0 0 4px var(--imp-bg);animation:bl .6s infinite alternate}
-@keyframes bl{to{opacity:.3}}
-.back{border:0;background:none;color:var(--brand-d);font-weight:700;font-size:16px;padding:6px 2px;margin-bottom:6px}
-.prof{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
-.prof h2{font-size:22px}
-.prof .row{margin-top:6px;color:var(--muted);font-size:15px}
-.archived{background:#F2F2F2;border:1px dashed #BDBDBD;color:#4a4a4a;border-radius:12px;padding:10px 12px;margin-top:12px;font-size:14.5px}
-.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.mini div{background:#F7F4F0;border-radius:10px;padding:8px 10px}
-.mini b{display:block;font-size:20px}
-.mini span{font-size:12.5px;color:var(--muted)}
-
-/* reunión */
-.wk{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px}
-.wk .arr{border:1px solid var(--line);background:#fff;width:42px;height:42px;border-radius:12px;font-size:20px;flex:none}
-.wk .arr:disabled{opacity:.35}
-.wk .c{flex:1;text-align:center}
-.wk .c b{display:block;font-size:16.5px}
-.wk .c span{font-size:13.5px;color:var(--muted)}
-.live{display:inline-block;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:700;border-radius:6px;padding:1px 7px;margin-left:4px}
-.kpis{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.kpi{background:#fff;border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:14px}
-.kpi b{font-size:16px}
-.kpi.u{border-color:#F3C7C1;background:var(--urg-bg);color:var(--urg)}
-.alertbox{background:var(--urg-bg);border:1.5px solid #F0B9B2;border-radius:var(--r);padding:12px 12px 2px}
-.alertbox .sec-t{color:var(--urg);margin:2px 2px 10px}
-details.grp{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
-details.grp summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
-details.grp summary::-webkit-details-marker{display:none}
-details.grp summary b{flex:1;font-size:16px}
-details.grp summary .cnt{font-size:13px;color:var(--muted);white-space:nowrap}
-details.grp summary::after{content:'›';font-size:22px;color:var(--soft);transform:rotate(90deg);transition:.15s}
-details.grp:not([open]) summary::after{transform:none}
-.line{display:block;width:100%;text-align:left;border:0;border-top:1px solid #EFEAE4;background:none;padding:10px 14px}
-.line .ld{font-size:13px;color:var(--soft);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.line .ld .c{font-weight:700;color:var(--cc)}
-.line p{margin:4px 0 0;font-size:15.5px;white-space:pre-line}
-.nonov{background:#fff;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px;color:var(--muted)}
-.wa-opts label{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:15px}
-.wa-opts input{width:22px;height:22px;accent-color:var(--brand)}
-.wa-txt{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;min-height:300px;background:#F7FBF8;border-color:#CFE5D7}
-
-/* tareas */
-.task{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
-.task.st-hecho{opacity:.65}
-.task.st-hecho .tk-b b{text-decoration:line-through}
-.stbtn{flex:none;border:2px solid var(--line);background:#fff;border-radius:10px;padding:7px 9px;font-size:13px;font-weight:700;min-width:96px}
-.st-pendiente .stbtn{border-color:#CFC6BC}
-.st-proceso .stbtn{border-color:var(--imp);background:var(--imp-bg);color:var(--imp)}
-.st-hecho .stbtn{border-color:var(--ok);background:var(--ok-bg);color:var(--ok)}
-.tk-b{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0}
-.tk-b b{display:block;font-size:16px}
-.tk-m{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13.5px;color:var(--muted);margin-top:5px}
-.venc{color:var(--urg);font-weight:700}
-.orig{background:var(--brand-bg);color:var(--brand-d);border-radius:6px;padding:0 6px;font-weight:700;font-size:12.5px}
-.toprow{display:flex;align-items:center;gap:10px;margin:4px 2px 12px}
-.toprow h1{margin:0;flex:1}
-
-/* sheet table for sync */
-.srow{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-bottom:8px}
-.srow .n{flex:1;min-width:0}
-.srow .n b{display:block;font-size:15px}
-.srow .n small{color:var(--soft);font-size:12.5px}
-.srow select{width:auto;max-width:48%;padding:8px 10px;font-size:14px;border-radius:10px}
-.srow.changed{border-color:var(--brand);background:var(--brand-bg)}
-.note{background:#EEF3F8;border:1px solid #D3E0EC;border-radius:12px;padding:10px 12px;font-size:14px;color:#2B4057}
-
-.oprow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:8px}
-.oprow.on{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
-.oprow b{flex:1}
-.gtag{font-size:12.5px;font-weight:700;border-radius:6px;padding:2px 8px;background:#F1ECE6;color:var(--brown)}
-
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.full-d{white-space:pre-line;font-size:17px;line-height:1.5;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px;margin-top:12px}
-.kv dt{color:var(--soft)}
-.kv dd{margin:0;font-weight:700}
 [hidden]{display:none!important}
-img.mark{object-fit:contain;background:none;width:38px;height:38px}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Hanken Grotesk",system-ui,-apple-system,Segoe UI,sans-serif;-webkit-text-size-adjust:100%}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+#app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:30;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px}
+.top img{width:38px;height:38px;object-fit:contain}
+.top .t{flex:1;font:700 26px Fraunces,serif;line-height:1}
+.top .t small{display:block;font:400 12.5px "Hanken Grotesk",sans-serif;color:var(--mut);margin-top:3px}
+.me{border:0;background:none;padding:0}
+.av{width:40px;height:40px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--acc);display:grid;place-items:center;font-weight:700;font-size:15px}
+.estado{max-width:560px;margin:0 auto 6px;background:var(--soft);border:1px solid var(--acc);border-radius:12px;color:var(--ink);font-size:14.5px;padding:10px 14px;text-align:center}
+.estado.err{border-color:var(--red);color:var(--red);background:#2a1512}
+main{padding:6px 14px 16px}
+h1{font:700 24px/1.2 Fraunces,serif;margin:6px 2px 14px}
+h2{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin:24px 2px 8px}
+h2.rojo{color:var(--red)}
+h3{font-size:15px;margin:0 0 8px;color:var(--mut)}
+.nota{color:var(--mut);font-size:14.5px;margin:0 2px 14px}
+.vacio{border:1px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--mut);font-size:15px}
+.buscar{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16px;margin-bottom:12px;color:var(--ink);outline:none}
+.nombres{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nb{position:relative;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 12px;min-height:64px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:3px;color:var(--ink)}
+.nb b{font-size:16.5px;line-height:1.2}
+.nb small.med{color:var(--blue);font-size:12.5px;font-weight:600}
+.nb:active{background:var(--soft);border-color:var(--acc)}
+.nb.gen{grid-column:1/-1;background:var(--acc);border-color:var(--acc);color:var(--accx)}
+.nb.gen small{color:#5a3a0c;font-size:13.5px}
+.punto{position:absolute;top:10px;right:10px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px #2a1512}
+.it{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;color:var(--ink)}
+.it.urg{border-color:var(--acc);background:linear-gradient(90deg,#2e2214,var(--card) 60%)}
+.it.sys{border-style:dashed;background:transparent}
+.it-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.it-top b{font-size:16px}
+.cuando{margin-left:auto;color:var(--mut);font-size:13px;white-space:nowrap}
+.it p{margin:6px 0 4px;font-size:15.5px;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.it small{color:var(--mut);font-size:12.5px}
+.tag{display:inline-block;background:var(--acc);color:var(--accx);font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px}
+.tag.gris{background:var(--card2);color:var(--mut);border:1px solid var(--line);font-weight:600}
+.fila{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:8px;color:var(--ink)}
+.fila b{flex:1;font-size:16px}
+.fila span{color:var(--mut);font-size:13.5px}
+.fila i{font-style:normal;color:var(--mut);font-size:22px;line-height:1}
+.volver{border:0;background:none;color:var(--acc);font-weight:700;font-size:16px;padding:4px 0;margin-bottom:6px}
+.btn{border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:13px 16px;font-weight:600;font-size:15.5px;text-align:center;text-decoration:none;color:var(--ink);display:inline-block}
+.btn.full{width:100%;display:block}
+.btn.grande{padding:16px;font-size:17px;font-weight:700}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--accx);font-weight:700}
+.btn.wa{background:#1f6b3d;border-color:#2f8a52;color:#fff}
+.btn.rojo{background:#3a1a14;border-color:#6a2c20;color:var(--red)}
+.btn.rojo-t{color:var(--red)}
+.btn.suave{background:transparent;color:var(--mut)}
+.btn:disabled{opacity:.6}
+.link{display:block;color:var(--acc);font-size:14.5px;font-weight:600;text-decoration:none;margin:-2px 2px 4px;text-align:right}
+.semana{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:12px}
+.semana>div{flex:1;text-align:center}
+.semana b{display:block;font:700 17px Fraunces,serif}
+.semana small{color:var(--ok);font-weight:700;font-size:12.5px}
+.semana button{width:44px;height:44px;border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:12px;font-size:20px}
+.semana button:disabled{opacity:.3}
+.bloque{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 14px;margin-bottom:8px}
+.bloque>b{display:block;font-size:16px;margin:2px 0 4px}
+.ln{display:block;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:none;padding:8px 0;font-size:15px;white-space:pre-line;color:var(--ink)}
+.bloque>.ln:first-child,.bloque>b+.ln{border-top:0}
+.ln span{display:block;color:var(--mut);font-size:13px}
+.ln b+span{margin-top:1px}
+.pd{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:15.5px}
+.pd:last-of-type{border-bottom:0}
+.pd input{width:24px;height:24px;flex:none;accent-color:var(--acc);margin:0}
+.pd.hecho span{text-decoration:line-through;color:var(--mut)}
+.nuevo{display:flex;gap:8px;margin-top:10px}
+.nuevo input{flex:1;min-width:0;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;color:var(--ink);outline:none}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#120f0c;border-top:1px solid var(--line);display:flex;justify-content:center;padding:7px 6px calc(10px + env(safe-area-inset-bottom));z-index:35}
+.nav button{position:relative;flex:1;max-width:140px;background:none;border:0;color:var(--mut);font:600 12px "Hanken Grotesk",sans-serif;text-align:center}
+.nav button span.ic{display:block;font-size:20px;line-height:30px;width:54px;margin:0 auto 2px;border-radius:99px}
+.nav button.on{color:var(--ink)}
+.nav button.on span.ic{background:#3a2c18}
+.badge{position:absolute;top:-2px;left:calc(50% + 12px);background:var(--red);color:#1b0d09;font-size:11px;font-weight:700;border-radius:999px;min-width:18px;height:18px;padding:0 5px;display:grid;place-items:center}
+.sheet-wrap{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.backdrop{position:absolute;inset:0;background:#000b}
+.sheet{position:relative;background:var(--card);width:100%;max-width:560px;max-height:94vh;border-radius:22px 22px 0 0;border-top:1px solid var(--line);display:flex;flex-direction:column;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}
+.sh-h{display:flex;align-items:center;gap:10px;padding:18px 16px 10px}
+.sh-h h2{flex:1;margin:0;color:var(--ink);font:700 22px Fraunces,serif;text-transform:none;letter-spacing:0}
+.x{border:1px solid var(--line);background:var(--card2);color:var(--mut);width:40px;height:40px;border-radius:12px;font-size:16px}
+.sh-b{padding:6px 16px 16px;overflow-y:auto;flex:1}
+.sh-foot{display:flex;gap:8px;padding:10px 16px calc(14px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sh-foot .btn.primary{flex:1}
+textarea{width:100%;min-height:170px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px;font-size:17px;color:var(--ink);resize:vertical;outline:none}
+textarea:focus,.buscar:focus,.nuevo input:focus,.inp:focus{border-color:var(--acc)}
+.urgbox{display:flex;gap:12px;align-items:flex-start;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px}
+.urgbox input{width:26px;height:26px;flex:none;accent-color:var(--acc);margin:0}
+.urgbox b{display:block;color:var(--acc)}
+.urgbox small{display:block;color:var(--mut);font-size:13.5px;margin-top:2px}
+.urgbox:has(input:checked){border-color:var(--acc);background:var(--soft)}
+.texto{white-space:pre-line;font-size:17px;line-height:1.5;background:var(--card2);border-radius:14px;padding:14px;margin-top:10px}
+.meta{color:var(--mut);font-size:14px}
+.err{color:var(--red);font-weight:600;font-size:14.5px;margin:10px 2px 0;display:none}
+.confirmar{background:#2a1512;border:1px solid #6a2c20;border-radius:12px;padding:12px;margin-top:12px}
+.confirmar div{display:flex;gap:8px;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#f0e8da;color:#1b140d;padding:11px 18px;border-radius:12px;font-weight:600;font-size:15px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+/* ingreso */
 #splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center}
-#splash[hidden]{display:none}
-.sp-in{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--brown)}
-.sp-in img{width:84px;height:84px;object-fit:contain;animation:lat 1.2s ease-in-out infinite alternate}
-@keyframes lat{to{transform:scale(1.06);opacity:.8}}
-.sp-in small{color:var(--soft)}
-#login{min-height:100vh;display:grid;place-items:center;padding:20px 16px;background:var(--bg)}
-#login[hidden]{display:none}
-.lg-box{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px 20px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.lg-brand{display:flex;align-items:center;gap:14px;margin-bottom:10px}
-.lg-brand img{width:58px;height:58px;object-fit:contain}
-.lg-brand small{color:var(--soft);font-size:14px}
-.lg-brand h1{margin:0;font-size:26px;color:var(--brown)}
+.sp-in{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sp-in b{font:700 20px Fraunces,serif}
+.sp-in small{color:var(--mut)}
+.sp-in img{width:80px;height:80px;object-fit:contain}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px 18px}
+.lg-box{width:100%;max-width:380px}
+.lg-brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin-bottom:6px}
+.lg-brand img{width:64px;height:64px;object-fit:contain}
+.lg-brand small{color:var(--mut);font-size:14px}
+.lg-brand h1{margin:0;font:700 30px Fraunces,serif}
+#ltxt{text-align:center}
 .lg-form{display:grid;gap:12px}
-.lg-form label{display:grid;gap:6px;font-weight:700;font-size:15px}
-.lg-rec{display:flex!important;grid-template-columns:none;align-items:center;gap:10px;font-weight:400!important;font-size:14.5px!important}
-.lg-rec input{width:22px;height:22px;accent-color:var(--brand)}
-.estado{max-width:480px;margin:0 auto;background:#EEF3F8;color:#2B4057;font-size:14px;padding:8px 14px;text-align:center}
-.estado[hidden]{display:none}
-.estado.err{background:var(--urg-bg);color:var(--urg);font-weight:700}
-#app[hidden],.nav[hidden],.fab-wrap[hidden]{display:none}
-.chip[hidden]{display:none}
+.lg-form label{display:grid;gap:5px;font-size:13px;color:var(--mut)}
+.inp{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;color:var(--ink);outline:none;color-scheme:dark}
+.lg-rec{display:flex!important;align-items:center;gap:10px;font-size:14px!important}
+.lg-rec input{width:20px;height:20px;accent-color:var(--acc)}
+.muted{color:var(--mut)}.soft{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -297,25 +164,18 @@ img.mark{object-fit:contain;background:none;width:38px;height:38px}
 
 <div id="app" hidden>
   <header class="top">
-    <div class="brand">
-      <img class="mark" src="logo.png" alt="">
-      <div style="min-width:0"><b>Alas de Libertad</b><small>Bitácora del equipo</small></div>
-    </div>
-    <button class="me" id="meBtn" onclick="abrirMenu()"></button>
+    <img src="logo.png" alt="">
+    <div class="t">Bitácora<small>Alas de Libertad</small></div>
+    <button class="me" id="meBtn" onclick="abrirMenu()" aria-label="Tu usuario"></button>
   </header>
-  <div class="estado" id="estado" role="status"></div>
+  <div class="estado" id="estado" role="status" hidden></div>
   <main id="main"></main>
 </div>
-
-<div class="fab-wrap" id="fabw" hidden><button class="fab" onclick="nuevoRegistro()"><span style="font-size:22px;line-height:1">+</span> Nuevo registro</button></div>
-
 <nav class="nav" id="nav" hidden>
-  <button data-v="bitacora" onclick="go('bitacora')"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>Bitácora</button>
-  <button data-v="internos" onclick="go('internos')"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.1c2.6.3 4.5 2.6 4.5 5.4"/></svg></span>Internos</button>
-  <button data-v="reunion" onclick="go('reunion')"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8.5 15l2.2 2 4.8-4.5"/></svg></span>Reunión vie</button>
-  <button data-v="tareas" onclick="go('tareas')"><span class="pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.5 6l1.2 1.2L7 5M3.5 12l1.2 1.2L7 11"/><circle cx="5" cy="18" r="1.3"/></svg></span>Tareas</button>
+  <button data-v="inicio" onclick="go('inicio')"><span class="ic">✏️</span>Anotar</button>
+  <button data-v="internos" onclick="go('internos')"><span class="ic">👥</span>Internos</button>
+  <button data-v="viernes" onclick="go('viernes')"><span class="ic">📅</span>Viernes</button>
 </nav>
-
 <div class="sheet-wrap" id="sheetWrap" hidden>
   <div class="backdrop" onclick="closeSheet()"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
@@ -332,6 +192,7 @@ img.mark{object-fit:contain;background:none;width:38px;height:38px}
    ============================================================ */
 const DEFAULT_API = "https://script.google.com/macros/s/AKfycbzYLuWCtvRv-sQobVzwXxUhTbjfhDuul9raoOD4RbxFOkBVaPI5FLEOU4TI5z3pQl9_/exec";
 let API = DEFAULT_API;
+const MED_API = "https://script.google.com/macros/s/AKfycbzYithfRv1aTYL1CrPeYHpAcq7XccGY3Gm7Bvlb56aCn65ZlT-FS7a6ePZ7-OumAz5LRw/exec"; // app de Médicos
 const HOJA_BIT = "Bitacora", HOJA_TAR = "Tareas Bitacora", HOJA_EGR = "Egresados";
 const DUR_MESES = 9;
 
@@ -376,18 +237,22 @@ const estCls = e => /termin|derivad|finaliz|egresad/i.test(e) ? 'ok' : /(fue|est
 /* ============ Estado ============ */
 let email = "", pass = "", role = "", token = "", soloCopia = false;
 const isAdmin = () => /admin/i.test(role) && !soloCopia;
-const RAW = {int:[], egr:[], reg:[], tar:[]};
+const RAW = {int:[], egr:[], reg:[], tar:[], med:[]};
+let MED = [];
 let PERS = [], BYID = {}, REGS = [], TAR = [];
 const S = { view:'bitacora', filtro:'todos', q:'', intTab:'activos', intSel:null, intCat:'todos', intQ:'', weekOffset:0, tFiltro:'abiertas', form:null, task:null, wa:{equipo:false, abrev:true, tareas:true}, ocupado:false };
 
 function miNombre(){ try { const n = localStorage.getItem('alas-bit-nombre'); if(n) return n; } catch(e){} const u = email.split('@')[0] || 'Usuario'; return u.charAt(0).toUpperCase()+u.slice(1); }
-const activos = () => PERS.filter(p => p.estado==='Activo').sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
+// Siempre por fecha de ingreso: el que más tiempo lleva en la casa, primero
+const porIngreso = (a,b) => (a.ingreso ? +a.ingreso : 9e15) - (b.ingreso ? +b.ingreso : 9e15) || a.nombre.localeCompare(b.nombre,'es');
+const activos = () => PERS.filter(p => p.estado==='Activo').sort(porIngreso);
 const bajas = () => PERS.filter(p => p.estado!=='Activo').sort((a,b)=>(b.baja?+b.baja:0)-(a.baja?+a.baja:0));
 function weekRange(offset){ const F = lastFriday(); const s = new Date(F.getTime()+offset*7*DAY); return [s, new Date(s.getTime()+7*DAY)]; }
 const inRange = (x,[s,e]) => { const t = D(x); return t>=s && t<e; };
 
 /* ============ Armar los datos que vienen de la planilla ============ */
-function armar(int, egr, reg, tar){
+function armar(int, egr, reg, tar, med){
+  if(Array.isArray(med)) RAW.med = med;
   if(Array.isArray(int)) RAW.int = int; if(Array.isArray(egr)) RAW.egr = egr; if(Array.isArray(reg)) RAW.reg = reg; if(Array.isArray(tar)) RAW.tar = tar;
   const act = RAW.int.filter(o => String(o.nombre||'').trim()).map(o => ({
     id:String(o.id||''), nombre:String(o.nombre).trim(), cedula:String(o.cedula||''), ingreso:diaLocal(toISO(o.ingreso)), tipo:String(o.tipo||''), estado:'Activo', baja:null }));
@@ -423,6 +288,15 @@ function armar(int, egr, reg, tar){
     texto:`Egreso registrado en la app de Internos (motivo: ${p.estado})${p.nota?'. Nota: '+p.nota:''}. Sale de la lista de activos; sus registros quedan guardados.` }));
   REGS.sort((a,b)=>b.fecha-a.fecha);
 
+  // Turnos de la app de Médicos: se unen a cada persona por el nombre
+  const kN = x => String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+  const porNombre = {}; PERS.forEach(p => { const k = kN(p.nombre); if(!porNombre[k] || p.estado==='Activo') porNombre[k] = p; });
+  MED = RAW.med.filter(t => t && t.interno && /^\d{4}-\d{2}-\d{2}/.test(String(t.fecha||''))).map(t => {
+    const d = fechaDe(String(t.fecha).slice(0,10) + (/^\d{1,2}:\d{2}/.test(String(t.hora||'')) ? ' ' + String(t.hora).slice(0,5) : ''));
+    const p = porNombre[kN(t.interno)];
+    return { id:String(t.id||''), nombre:String(t.interno).trim(), pid: p ? p.id : '', fecha:d, hora:/^\d{1,2}:\d{2}/.test(String(t.hora||'')) ? String(t.hora).slice(0,5) : '',
+      lugar:String(t.lugar||''), esp:String(t.especialidad||''), estado:String(t.estado||'pendiente') };
+  }).sort((a,b) => a.fecha - b.fecha);
   TAR = RAW.tar.filter(o => o.id && String(o.titulo||'').trim()).map(o => ({ id:String(o.id), titulo:String(o.titulo), estado: TSTATE[o.estado] ? o.estado : 'pendiente',
     resp:String(o.responsable||''), limite:toISO(o.limite), origen:String(o.origen||''), creada:String(o.creada||''), creadapor:String(o.creadapor||''), _fila:o._fila }));
 
@@ -444,7 +318,7 @@ function sesionGuardada(){ try { const p = JSON.parse(sessionStorage.getItem('al
   if(p && p.token && Date.now()-p.t < 60000) return p; return JSON.parse(localStorage.getItem('alas-token')||'null'); } catch(x){ return null; } }
 function borrarSesion(){ try { ['alas-cache','alas-cache-cuartos','alas-cache-med','alas-cache-bitacora','alas-token','internos-pw'].forEach(k=>localStorage.removeItem(k)); sessionStorage.removeItem('alas-sesion'); sessionStorage.removeItem('alas-paso'); } catch(x){} }
 function cerrarSesion(){ const uid = FSC.uid; fsSalir(); if(token) api({action:'logout', uid}).catch(()=>{}); borrarSesion(); token=''; pass=''; try { AlasBloqueo.olvidar(); } catch(x){} }
-document.addEventListener('click', e => { if(e.target.closest('a[data-internos]')) pasarSesion(); });
+document.addEventListener('click', e => { if(e.target.closest('a[data-pasa]')) pasarSesion(); });
 
 /* ============ Comunicación con la hoja (mismo script que Internos) ============ */
 const REPETIBLE = a => /^(get|check|list)/i.test(a||'') || ['updateRow','inicio'].includes(a);
@@ -467,7 +341,7 @@ async function api(datos){
 }
 function sesionVencida(txt){ borrarSesion(); token=''; pass=''; role=''; mostrar(false); modoSetup(false); $('lmsg').textContent = txt || 'Tu sesión venció. Ingresá de nuevo con tu contraseña.'; }
 function leerCache(em){ try { const c = JSON.parse(localStorage.getItem('alas-cache-bitacora')||'null'); return c && c.email===em && c.d ? c : null; } catch(x){ return null; } }
-function guardarCache(){ try { if(token && localStorage.getItem('alas-token')) localStorage.setItem('alas-cache-bitacora', JSON.stringify({email, role, t:Date.now(), d:[RAW.int, RAW.egr, RAW.reg, RAW.tar]})); } catch(x){} }
+function guardarCache(){ try { if(token && localStorage.getItem('alas-token')) localStorage.setItem('alas-cache-bitacora', JSON.stringify({email, role, t:Date.now(), d:[RAW.int, RAW.egr, RAW.reg, RAW.tar, RAW.med]})); } catch(x){} }
 const datos = r => (r && Array.isArray(r.data)) ? r.data : [];
 
 async function cargar(){
@@ -488,8 +362,18 @@ async function cargar(){
   estado('');
   FSC.datos = {internos:int, ['hoja_'+HOJA_EGR]:egr}; Object.keys(FSC.datos).forEach(k => FSC.ult[k] = JSON.stringify(FSC.datos[k]));
   setTimeout(fsEscuchar, 0);
+  cargarMedicos();
 }
 // Registros y tareas que anotan los compañeros: se traen solos cada minuto (y al volver a la app)
+// Turnos de médicos (de la app de Médicos, con la misma sesión). Si no contesta, la bitácora sigue igual.
+async function apiMed(datos){
+  const r = await fetch(MED_API, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({correo:email, token}, datos))});
+  return r.json();
+}
+async function cargarMedicos(){
+  if(!token) return;
+  try { const r = await apiMed({accion:'listar'}); if(r && r.ok!==false && Array.isArray(r.turnos)){ RAW.med = r.turnos; armar(); guardarCache(); } } catch(e){}
+}
 async function refrescarBitacora(silencioso=true){
   if(!token || S.ocupado) return;
   try { const [bit, tar] = await Promise.all([api({action:'getSheet', sheet:HOJA_BIT}), api({action:'getSheet', sheet:HOJA_TAR})]);
@@ -499,7 +383,7 @@ async function refrescarBitacora(silencioso=true){
     if(!silencioso && antes !== RAW.reg.length + '|' + RAW.tar.map(t=>t.estado).join()) toast('Hay novedades nuevas del equipo');
   } catch(e){ if(!silencioso) estado('No se pudo actualizar ('+e.message+').', true); }
 }
-setInterval(() => { if(document.visibilityState==='visible') refrescarBitacora(false); }, 60000);
+setInterval(() => { if(document.visibilityState==='visible'){ refrescarBitacora(false); cargarMedicos(); } }, 60000);
 document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible' && token) refrescarBitacora(false); });
 
 /* ============ Base en tiempo real (Firebase): altas y egresos de la app de Internos llegan solos ============ */
@@ -561,393 +445,225 @@ async function borrarFila(hoja, id, log){
   finally { S.ocupado = false; }
 }
 
-/* ============ Navegación ============ */
-function go(v){ S.view = v; if(v!=='internos') S.intSel = null; render(); window.scrollTo(0,0); }
-function mostrar(app){ $('login').hidden = app; ['app','nav','fabw'].forEach(k => $(k).hidden = !app); }
+/* ============ Pantallas (versión simple) ============ */
+const V = { view:'inicio', intSel:null, verEgr:false, semana:0, verHechos:false };
+
+function go(v){ V.view = v; V.intSel = null; render(); window.scrollTo(0,0); }
+function mostrar(app){ $('login').hidden = app; $('app').hidden = !app; $('nav').hidden = !app; }
 function estado(t, err){ const e = $('estado'); e.textContent = t || ''; e.classList.toggle('err', !!err); e.hidden = !t; }
+
 function render(){
   if($('app').hidden) return;
   const m = $('main');
-  if(S.view==='bitacora') m.innerHTML = vBitacora();
-  if(S.view==='internos') m.innerHTML = S.intSel ? vInterno() : vInternos();
-  if(S.view==='reunion') m.innerHTML = vReunion();
-  if(S.view==='tareas') m.innerHTML = vTareas();
-  document.querySelectorAll('#nav button').forEach(b => { b.classList.toggle('on', b.dataset.v===S.view); b.querySelector('.badge')?.remove(); });
-  const wk = weekRange(0);
-  const urg = REGS.filter(r=>r.prio==='urgente' && inRange(r.fecha,wk)).length;
-  const pend = TAR.filter(t=>t.estado!=='hecho').length;
-  if(urg) document.querySelector('#nav [data-v=reunion]').insertAdjacentHTML('beforeend',`<span class="badge">${urg}</span>`);
-  if(pend) document.querySelector('#nav [data-v=tareas]').insertAdjacentHTML('beforeend',`<span class="badge n">${pend}</span>`);
-  $('meBtn').innerHTML = `<span class="av">${esc(initials(miNombre()))}</span>${esc(miNombre().split(' ')[0])}`;
+  if(V.view==='inicio') m.innerHTML = vInicio();
+  if(V.view==='internos') m.innerHTML = V.intSel ? vPersona() : vInternos();
+  if(V.view==='viernes') m.innerHTML = vViernes();
+  document.querySelectorAll('#nav button').forEach(b => { b.classList.toggle('on', b.dataset.v===V.view); b.querySelector('.badge')?.remove(); });
+  const urg = REGS.filter(r => r.prio==='urgente' && !r.sistema && inRange(r.fecha, weekRange(0))).length;
+  if(urg) document.querySelector('#nav [data-v=viernes]').insertAdjacentHTML('beforeend', `<span class="badge">${urg}</span>`);
+  $('meBtn').innerHTML = `<span class="av">${esc(initials(miNombre()))}</span>`;
 }
 
-/* ============ Componentes ============ */
-function prioBadge(p){ return p==='normal' ? '' : `<span class="pb ${p}">${p==='urgente'?'⚠ Urgente':'Importante'}</span>`; }
-function intChips(r){
-  if(!r.internos.length) return `<div class="ints"><span class="ichip gen">General</span></div>`;
-  return `<div class="ints">${r.internos.map(id=>{ const i = BYID[id]; if(!i) return ''; return `<span class="ichip ${i.estado!=='Activo'?'baja':''}">${esc(shortName(i.nombre))}</span>`; }).join('')}</div>`;
-}
-function regCard(r, {full=false}={}){
-  const c = CATS[r.cat];
-  return `<button class="reg p-${r.prio}" style="--cc:${c.color}" onclick="verRegistro('${esc(r.id)}')">
-    <div class="reg-h"><span class="cat">${c.icon} ${c.short}</span>${prioBadge(r.prio)}${r.sistema?'<span class="sys">Automático</span>':''}<span class="time">${full?relDay(r.fecha)+' · ':''}${fTime(r.fecha)}</span></div>
-    ${intChips(r)}
-    <p class="txt">${esc(r.texto)}</p>
-    <div class="reg-f">${r.sistema?'Desde la app de Internos':'Registró: '+esc(r.operador)}${r.personal?` · <span class="inv">Involucra a ${esc(r.personal)}</span>`:''}</div>
+/* ---- piezas ---- */
+const URL_MED = 'https://reboirasnicolas4-dev.github.io/turnos-m4p8/';
+const medDe = (pid, desde, hasta, soloPend=true) => MED.filter(t => t.pid===pid && t.fecha>=desde && t.fecha<hasta && (!soloPend || t.estado==='pendiente'));
+const cuandoMed = d => { const n = dayDiff(d, new Date()); return n===0 ? 'hoy' : n===1 ? 'mañana' : fDate(d); };
+const medTxt = t => `${fDate(t.fecha)}${t.hora ? ' ' + t.hora : ''}${t.esp ? ' · ' + t.esp : ''}${t.lugar ? ' · ' + t.lugar : ''}`;
+const estMed = t => t.estado==='fue' ? ' ✔ fue' : t.estado==='nofue' ? ' ✖ no fue' : '';
+const quien = r => r.internos.length ? r.internos.map(id => BYID[id] ? BYID[id].nombre : '').join(', ') : 'General';
+function item(r, conNombre=true){
+  return `<button class="it ${r.prio==='urgente'?'urg':''} ${r.sistema?'sys':''}" onclick="ver('${esc(r.id)}')">
+    <div class="it-top">${conNombre?`<b>${esc(quien(r))}</b>`:''}${r.prio==='urgente'?'<span class="tag">⚠ Urgente</span>':''}<span class="cuando">${relDay(r.fecha)} · ${fTime(r.fecha)}</span></div>
+    <p>${esc(r.texto)}</p>
+    <small>${r.sistema ? 'Automático (app de Internos)' : esc(r.operador)}</small>
   </button>`;
 }
-function regLine(r){
-  const c = CATS[r.cat];
-  return `<button class="line" style="--cc:${c.color}" onclick="verRegistro('${esc(r.id)}')">
-    <div class="ld"><span>${fDate(r.fecha)} ${fTime(r.fecha)}</span><span class="c">${c.icon} ${c.short}</span>${prioBadge(r.prio)}<span>· ${esc(r.sistema?'App de Internos':r.operador)}</span></div>
-    <p>${esc(r.texto)}</p></button>`;
+function filtrarNombres(q){ q = q.trim().toLowerCase(); document.querySelectorAll('[data-n]').forEach(b => b.hidden = !!q && !b.dataset.n.includes(q)); }
+
+/* ---- INICIO: anotar ---- */
+function vInicio(){
+  const act = activos(), wk = weekRange(0);
+  const urgDe = id => REGS.some(r => r.prio==='urgente' && !r.sistema && r.internos.includes(id) && inRange(r.fecha, wk));
+  const ult = REGS.filter(r => !r.sistema).slice(0, 15);
+  return `
+  <h1>¿De quién querés anotar algo?</h1>
+  ${act.length > 10 ? `<input class="buscar" type="search" placeholder="🔍 Buscar nombre…" oninput="filtrarNombres(this.value)">` : ''}
+  <div class="nombres">
+    <button class="nb gen" onclick="anotar('')"><b>🏠 General</b><small>la casa, el equipo, otras cosas</small></button>
+    ${act.map(p => { const m = medDe(p.id, midnight(new Date()), new Date(midnight(new Date()).getTime() + 4*DAY))[0];
+      return `<button class="nb" data-n="${esc(p.nombre.toLowerCase())}" onclick="anotar('${esc(p.id)}')"><b>${esc(p.nombre)}</b>${m ? `<small class="med">🩺 médico ${cuandoMed(m.fecha)}</small>` : ''}${urgDe(p.id)?'<span class="punto" title="Tiene algo urgente esta semana"></span>':''}</button>`; }).join('')}
+  </div>
+  ${act.length ? '' : '<div class="vacio">No hay internos activos en la app de Internos.</div>'}
+  <h2>Lo último que se anotó</h2>
+  ${ult.map(r => item(r)).join('') || '<div class="vacio">Todavía no hay nada anotado. Tocá un nombre para empezar.</div>'}`;
 }
 
-/* ============ Vista: Bitácora ============ */
-function vBitacora(){
-  const [F, end] = weekRange(0);
-  const dd = dayDiff(end, new Date());
-  const cuando = dd<=0 ? 'hoy' : dd===1 ? 'mañana' : `en ${dd} días`;
-  const urg = REGS.filter(r=>r.prio==='urgente' && inRange(r.fecha,[F,end])).length;
-  const pend = TAR.filter(t=>t.estado!=='hecho').length;
-  let list = REGS;
-  if(S.filtro==='urgente') list = list.filter(r=>r.prio==='urgente');
-  else if(S.filtro!=='todos') list = list.filter(r=>r.cat===S.filtro);
-  const q = S.q.trim().toLowerCase();
-  if(q) list = list.filter(r => (r.texto+' '+r.operador+' '+r.personal+' '+r.internos.map(id=>BYID[id]?.nombre||'').join(' ')).toLowerCase().includes(q));
-  const total = list.length; list = list.slice(0, 80);
-  let html = '', last = '';
-  for(const r of list){ const d = relDay(r.fecha); if(d!==last){ html += `<div class="day">${d}</div>`; last = d; } html += regCard(r); }
-  const F_ = (v,l) => `<button class="fchip ${S.filtro===v?'on':''}" onclick="S.filtro='${v}';render()">${l}</button>`;
-  return `
-  <div class="guard">
-    <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg></div>
-    <div><b>Guardia de esta semana</b><span>Entró el ${fDate(F)} · cambio de guardia ${fDate(end)} (${cuando})</span></div>
-  </div>
-  <div class="stats">
-    <button class="stat ${urg?'alert':''}" onclick="go('reunion')"><b>${urg}</b><span>Alertas urgentes esta semana</span></button>
-    <button class="stat" onclick="go('tareas')"><b>${pend}</b><span>Tareas pendientes</span></button>
-    <button class="stat" onclick="go('internos')"><b>${activos().length}</b><span>Internos activos</span></button>
-  </div>
-  <div class="filters">${F_('todos','Todos')}${F_('urgente','⚠ Urgentes')}${F_('conducta','🧭 Conducta')}${F_('familia','📞 Familia')}${F_('equipo','🤝 Equipo')}${F_('general','🏠 General')}</div>
-  <input class="search" id="q" type="search" placeholder="Buscar en la bitácora (nombre, palabra…)" value="${esc(S.q)}" oninput="S.q=this.value;clearTimeout(window._qt);window._qt=setTimeout(()=>{render();const s=$('q');s.focus();s.setSelectionRange(s.value.length,s.value.length)},300)">
-  ${html || `<div class="empty" style="margin-top:14px">${REGS.length ? 'No hay registros con ese filtro.' : 'Todavía no hay nada anotado. Tocá <b>+ Nuevo registro</b> para empezar.'}</div>`}
-  ${total>80?`<p class="hint" style="text-align:center">Se muestran los 80 más recientes. Usá el buscador o la ficha de cada interno para ver más.</p>`:''}`;
-}
-
-/* ============ Vista: Internos ============ */
-function vInternos(){
-  const wk = weekRange(0);
-  const tab = (v,l,n) => `<button class="${S.intTab===v?'on':''}" onclick="S.intTab='${v}';render()">${l} (${n})</button>`;
-  const q = S.intQ.trim().toLowerCase();
-  const filtra = arr => q ? arr.filter(p => (p.nombre+' '+p.cedula).toLowerCase().includes(q)) : arr;
-  let list = '';
-  if(S.intTab==='activos'){
-    list = filtra(activos()).map(i=>{
-      const rs = REGS.filter(r=>r.internos.includes(i.id) && inRange(r.fecha,wk));
-      const u = rs.filter(r=>r.prio==='urgente').length;
-      return `<button class="icard" onclick="abrirInterno('${esc(i.id)}')">
-        <span class="ini">${esc(initials(i.nombre))}</span>
-        <span class="b"><b>${esc(i.nombre)}</b><small>${i.ingreso?`Mes ${mesDe(i.ingreso)} de ${DUR_MESES} · `:''}${esc(i.tipo||'')}</small>${u?`<span class="flag">⚠ ${u} alerta${u>1?'s':''} esta semana</span>`:''}</span>
-        <span class="r">${rs.length} nov.<br>esta semana</span></button>`;
-    }).join('');
-  } else {
-    list = `<div class="note" style="margin-bottom:10px">Archivo de solo consulta. Vienen de la pestaña Egresados de Base_Internos. Sus registros de la bitácora quedan guardados completos.</div>` +
-    filtra(bajas()).map(i=>{
-      const n = REGS.filter(r=>r.internos.includes(i.id) && !r.sistema).length;
-      return `<button class="icard" onclick="abrirInterno('${esc(i.id)}')">
-        <span class="ini" style="background:#ECECEC;color:#666">${esc(initials(i.nombre))}</span>
-        <span class="b"><b>${esc(i.nombre)}</b><small>${i.baja?'Egreso: '+fDateY(i.baja):'Ya no figura en Internos'}${i.ingreso&&i.baja?' · estuvo '+durTxt(i.ingreso, i.baja):''}</small><span class="est ${estCls(i.estado)}">${esc(i.estado)}</span></span>
-        <span class="r">${n} registros</span></button>`;
-    }).join('');
-  }
-  return `
-  <h1>Internos</h1>
-  <div class="tabs">${tab('activos','Activos',activos().length)}${tab('archivo','Egresados',bajas().length)}</div>
-  <div class="sync"><span class="dot"></span><div><b>Conectada a la app de Internos</b><br><span class="muted">Base_Internos · las altas y egresos llegan solos</span></div></div>
-  <p class="hint" style="margin:6px 4px 0">Acá no se cargan ni se borran internos: se hace en la app de Internos y aparece acá automáticamente.</p>
-  <input class="search" type="search" placeholder="Buscar por nombre o cédula…" value="${esc(S.intQ)}" oninput="S.intQ=this.value;clearTimeout(window._qi);window._qi=setTimeout(()=>{render();const s=document.querySelectorAll('.search')[0];s.focus();s.setSelectionRange(s.value.length,s.value.length)},300)">
-  <div style="margin-top:12px">${list || '<div class="empty">Sin internos en esta lista.</div>'}</div>`;
-}
-function abrirInterno(id){ S.intSel = id; S.intCat = 'todos'; render(); window.scrollTo(0,0); }
-function vInterno(){
-  const i = BYID[S.intSel]; if(!i){ S.intSel = null; return vInternos(); }
-  const wk = weekRange(0);
-  const all = REGS.filter(r=>r.internos.includes(i.id));
-  const list = S.intCat==='todos' ? all : all.filter(r=>r.cat===S.intCat);
-  const act = i.estado==='Activo';
-  const F_ = (v,l) => `<button class="fchip ${S.intCat===v?'on':''}" onclick="S.intCat='${v}';render()">${l}</button>`;
-  return `
-  <button class="back" onclick="S.intSel=null;render()">‹ Internos</button>
-  <div class="prof">
-    <div style="display:flex;gap:12px;align-items:center"><span class="ini" style="width:54px;height:54px;font-size:18px;${act?'':'background:#ECECEC;color:#666'}">${esc(initials(i.nombre))}</span>
-    <div><h2>${esc(i.nombre)}</h2><div class="row" style="margin-top:2px">${i.cedula?'C.I. '+esc(i.cedula):''}${i.tipo?' · '+esc(i.tipo):''}</div></div></div>
-    ${i.ingreso?`<div class="row">Ingresó el ${fDateY(i.ingreso)} · ${act?`mes ${mesDe(i.ingreso)} de ${DUR_MESES}`:'estuvo '+durTxt(i.ingreso, i.baja||new Date())}</div>`:''}
-    ${act?'':`<div class="archived"><span class="est ${estCls(i.estado)}">${esc(i.estado)}</span> &nbsp;${i.baja?'Egreso el '+fDateY(i.baja):''}${i.nota?'<br>Nota: '+esc(i.nota):''}<br>Archivo: solo consulta. No aparece en los desplegables de nuevos registros.</div>`}
-    <div class="mini"><div><b>${all.filter(r=>!r.sistema).length}</b><span>Registros</span></div><div><b>${all.filter(r=>inRange(r.fecha,wk)&&!r.sistema).length}</b><span>Esta semana</span></div><div><b>${all.filter(r=>r.cat==='familia').length}</b><span>Contactos familia</span></div></div>
-    ${act?`<button class="btn primary full" style="margin-top:12px" onclick="nuevoRegistro({internos:['${esc(i.id)}']})">+ Registro para ${esc(i.nombre.split(' ')[0])}</button>`:''}
-  </div>
-  <div class="filters">${F_('todos','Todo')}${F_('conducta','🧭 Conducta')}${F_('familia','📞 Familia')}${F_('equipo','🤝 Equipo')}</div>
-  <div class="sec-t">Historial cronológico <span class="n">${list.length}</span></div>
-  ${list.map(r=>regCard(r,{full:true})).join('') || '<div class="empty">Sin registros en esta categoría.</div>'}`;
-}
-
-/* ============ Vista: Reunión de viernes ============ */
-function reunionData(){
-  const rng = weekRange(S.weekOffset), [s,e] = rng;
-  const regs = REGS.filter(r=>inRange(r.fecha,rng)).sort((a,b)=>a.fecha-b.fecha);
-  const urg = regs.filter(r=>r.prio==='urgente');
-  const rest = regs.filter(r=>r.prio!=='urgente');
-  const bajasSem = PERS.filter(i=>i.baja && !i.fantasma && inRange(i.baja,rng));
-  const presentes = PERS.filter(i => !i.fantasma && (!i.ingreso || i.ingreso < e) && (i.estado==='Activo' || (i.baja && i.baja >= s))).sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
-  const ids = new Set(presentes.map(p=>p.id));
-  PERS.filter(p=>p.fantasma && regs.some(r=>r.internos.includes(p.id))).forEach(p=>{ if(!ids.has(p.id)) presentes.push(p); });
-  const porInt = presentes.map(i=>({i, regs: rest.filter(r=>r.cat!=='equipo' && r.internos.includes(i.id)), urg: urg.filter(r=>r.internos.includes(i.id)).length}));
-  const equipo = rest.filter(r=>r.cat==='equipo');
-  const generales = rest.filter(r=>r.cat!=='equipo' && !r.internos.length);
-  const tareas = TAR.filter(t=>t.estado!=='hecho').sort(sortTareas);
-  return {s,e,regs,urg,rest,bajasSem,porInt,equipo,generales,tareas};
-}
-function vReunion(){
-  const R = reunionData(), live = new Date() < R.e && new Date() >= R.s;
-  const con = R.porInt.filter(x=>x.regs.length || x.urg), sin = R.porInt.filter(x=>!x.regs.length && !x.urg && x.i.estado==='Activo');
-  return `
-  <h1>Reunión de viernes</h1>
-  <div class="wk">
-    <button class="arr" onclick="S.weekOffset--;render()" aria-label="Semana anterior">‹</button>
-    <div class="c"><b>Reunión del ${fDate(R.e)}</b><span>Guardia: ${fDate(R.s)} → ${fDate(R.e)}</span>${live?'<span class="live">En curso</span>':''}</div>
-    <button class="arr" onclick="S.weekOffset++;render()" ${S.weekOffset>=0?'disabled':''} aria-label="Semana siguiente">›</button>
-  </div>
-  <div class="kpis"><span class="kpi"><b>${R.regs.filter(r=>!r.sistema).length}</b> registros</span><span class="kpi ${R.urg.length?'u':''}"><b>${R.urg.length}</b> urgentes</span><span class="kpi ${R.bajasSem.length?'u':''}"><b>${R.bajasSem.length}</b> egresos</span><span class="kpi"><b>${R.tareas.length}</b> tareas abiertas</span></div>
-  <button class="btn wa" onclick="abrirWA()"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>Exportar / copiar resumen para WhatsApp</button>
-  <div class="alertbox" style="margin-top:18px">
-    <div class="sec-t">⚠ Alertas urgentes <span class="n">${R.urg.length}</span></div>
-    ${R.urg.map(r=>regCard(r,{full:true})).join('') || '<div class="nonov" style="margin-bottom:10px">Sin alertas urgentes esta semana.</div>'}
-  </div>
-  <div class="sec-t">Novedades por interno <span class="n">${con.length}</span></div>
-  ${con.map(x=>`<details class="grp" open><summary><span class="ini" style="width:34px;height:34px;font-size:13px;${x.i.estado!=='Activo'?'background:#ECECEC;color:#666':''}">${esc(initials(x.i.nombre))}</span><b>${esc(x.i.nombre)}${x.i.estado!=='Activo'?` <span class="est ${estCls(x.i.estado)}">${esc(x.i.estado)}</span>`:''}</b><span class="cnt">${x.regs.length} nov.${x.urg?` · <span style="color:var(--urg);font-weight:700">⚠ ${x.urg}</span>`:''}</span></summary>
-    ${x.urg?`<div class="line" style="color:var(--urg);font-size:14px">⚠ ${x.urg} alerta${x.urg>1?'s':''} urgente${x.urg>1?'s':''} (ver arriba)</div>`:''}
-    ${x.regs.map(regLine).join('')}</details>`).join('') || '<div class="empty">Sin novedades por interno.</div>'}
-  ${sin.length?`<div class="nonov"><b>Sin novedades registradas:</b> ${sin.map(x=>esc(x.i.nombre)).join(', ')}. <span class="soft">¿Hay algo para anotar de ellos?</span></div>`:''}
-  <div class="sec-t">🤝 Equipo / operadores <span class="n">${R.equipo.length}</span></div>
-  ${R.equipo.length?`<details class="grp" open><summary><b>Incidencias del equipo</b><span class="cnt">${R.equipo.length}</span></summary>${R.equipo.map(regLine).join('')}</details>`:'<div class="nonov">Sin incidencias de equipo (no urgentes).</div>'}
-  <div class="sec-t">🏠 Novedades generales <span class="n">${R.generales.length}</span></div>
-  ${R.generales.length?`<details class="grp" open><summary><b>Comunidad</b><span class="cnt">${R.generales.length}</span></summary>${R.generales.map(regLine).join('')}</details>`:'<div class="nonov">Sin novedades generales.</div>'}
-  <div class="sec-t">📋 Tareas para la guardia entrante <span class="n">${R.tareas.length}</span></div>
-  ${R.tareas.map(taskCard).join('')}
-  <button class="btn full" onclick="nuevaTarea('Reunión ${fDate(R.e)}')">+ Anotar tarea surgida en la reunión</button>`;
-}
-const waName = (i, abrev) => abrev ? shortName(i.nombre) : i.nombre;
-function buildWA(){
-  const R = reunionData(), o = S.wa;
-  const clip = t => t.length>220 ? t.slice(0,217).trimEnd()+'…' : t;
-  const who = r => r.internos.length ? r.internos.map(id=>waName(BYID[id],o.abrev)).join(', ') : 'General';
-  const okEq = r => o.equipo || r.cat!=='equipo';
-  const L = [];
-  L.push(`*ALAS DE LIBERTAD · Reunión de viernes*`);
-  L.push(`Guardia: ${fDate(R.s)} → ${fDate(R.e)}`);
-  L.push(`${R.regs.filter(r=>!r.sistema).length} registros · ${R.urg.length} alertas · ${R.bajasSem.length} egresos`);
-  L.push('');
-  const urg = R.urg.filter(okEq).filter(r=>!r.sistema);
-  L.push(`🔴 *ALERTAS URGENTES*`);
-  if(R.bajasSem.length) L.push(`• *Egresos:* ${R.bajasSem.map(i=>`${waName(i,o.abrev)} (${i.estado}, ${fDate(i.baja)})`).join('; ')}`);
-  urg.forEach(r=>L.push(`• *${who(r)}* (${fDate(r.fecha)}): ${clip(r.texto)}`));
-  if(!urg.length && !R.bajasSem.length) L.push('• Sin alertas urgentes.');
-  L.push('');
-  L.push(`👥 *NOVEDADES POR INTERNO*`);
-  R.porInt.filter(x=>x.regs.length).forEach(x=>{ L.push(`*${waName(x.i,o.abrev)}*`); x.regs.forEach(r=>L.push(`  – ${fDate(r.fecha)}: ${clip(r.texto)}`)); });
-  const sin = R.porInt.filter(x=>!x.regs.length && !x.urg && x.i.estado==='Activo');
-  if(sin.length) L.push(`_Sin novedades: ${sin.map(x=>waName(x.i,o.abrev)).join(', ')}_`);
-  L.push('');
-  if(o.equipo){ L.push(`🤝 *EQUIPO / OPERADORES*`); R.equipo.forEach(r=>L.push(`• ${fDate(r.fecha)}: ${clip(r.texto)}`)); if(!R.equipo.length) L.push('• Sin incidencias.'); L.push(''); }
-  L.push(`🏠 *NOVEDADES GENERALES*`);
-  R.generales.forEach(r=>L.push(`• ${fDate(r.fecha)}: ${clip(r.texto)}`)); if(!R.generales.length) L.push('• Sin novedades.');
-  if(o.tareas){ L.push(''); L.push(`📋 *TAREAS PARA LA GUARDIA ENTRANTE*`);
-    R.tareas.forEach(t=>L.push(`☐ ${t.titulo}${t.resp?` — ${t.resp.split(' ')[0]}`:''}${t.limite?` (vence ${fDate(diaLocal(t.limite))})`:''}${t.estado==='proceso'?' [en proceso]':''}`));
-    if(!R.tareas.length) L.push('• Sin tareas pendientes.'); }
-  if(!o.equipo){ L.push(''); L.push('_Las incidencias de equipo se tratan solo en la reunión._'); }
-  return L.join('\n');
-}
-function abrirWA(){
-  const ck = (k,l) => `<label><input type="checkbox" ${S.wa[k]?'checked':''} onchange="S.wa['${k}']=this.checked;$('waT').value=buildWA()"> ${l}</label>`;
+function anotar(id){
+  const p = id ? BYID[id] : null;
   openSheet(`
-    <div class="sh-h"><h2>Resumen para WhatsApp</h2><button class="x" onclick="closeSheet()">✕</button></div>
+    <div class="sh-h"><h2>${p ? esc(p.nombre) : '🏠 General'}</h2><button class="x" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
     <div class="sh-b">
-      <div class="wa-opts">${ck('abrev','Solo nombre e inicial del apellido (más privado)')}${ck('tareas','Incluir tareas pendientes')}${ck('equipo','Incluir incidencias de equipo / operadores')}</div>
-      <textarea id="waT" class="wa-txt" readonly>${esc(buildWA())}</textarea>
-      <p class="hint">Los *asteriscos* se ven en negrita en WhatsApp.</p>
+      <textarea id="aTxt" placeholder="¿Qué pasó? Escribí, o tocá el 🎤 del teclado para dictar."></textarea>
+      <label class="urgbox"><input type="checkbox" id="aUrg"><span><b>⚠ Es urgente</b><small>Riesgo de que se vaya, problema grave, reclamo fuerte… Sale primero en el resumen del viernes.</small></span></label>
+      <p class="err" id="aErr"></p>
     </div>
-    <div class="sh-foot">${navigator.share?`<button class="btn" onclick="compartirWA()">Compartir</button>`:''}<button class="btn wa" style="flex:1" onclick="copiarWA()">Copiar resumen</button></div>`);
+    <div class="sh-foot"><button class="btn primary grande" id="aSave" onclick="guardarNota('${p ? esc(p.id) : ''}')">Guardar</button></div>`);
+  setTimeout(() => $('aTxt')?.focus(), 250);
 }
-async function compartirWA(){ try { await navigator.share({text:$('waT').value}); } catch(e){ if(e.name!=='AbortError') copiarWA(); } }
-async function copiarWA(){
-  const t = $('waT'); let ok = false;
-  try { await navigator.clipboard.writeText(t.value); ok = true; } catch(e){
-    try { t.removeAttribute('readonly'); t.select(); ok = document.execCommand('copy'); t.setAttribute('readonly',''); } catch(e2){} }
-  if(ok) toast('Resumen copiado. Pegalo en el grupo de WhatsApp.'); else { t.focus(); t.select(); toast('Seleccioné el texto: copialo manualmente.'); }
-}
-
-/* ============ Vista: Tareas ============ */
-function sortTareas(a,b){ const o = {proceso:0,pendiente:1,hecho:2}; return o[a.estado]-o[b.estado] || (a.limite||'9999').localeCompare(b.limite||'9999'); }
-function taskCard(t){
-  let lim = '';
-  if(t.limite){ const d = dayDiff(diaLocal(t.limite), new Date());
-    const venc = t.estado!=='hecho' && d<0, hoy = t.estado!=='hecho' && d===0;
-    lim = `<span class="${venc||hoy?'venc':''}">📅 ${venc?'Vencida · ':hoy?'Vence hoy · ':''}${fDate(diaLocal(t.limite))}</span>`; }
-  return `<div class="task st-${t.estado}">
-    <button class="stbtn" onclick="cicloTarea('${esc(t.id)}')" title="Cambiar estado">${t.estado==='hecho'?'✓ ':''}${TSTATE[t.estado]}</button>
-    <button class="tk-b" onclick="editarTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b>
-      <span class="tk-m"><span>👤 ${esc(t.resp||'Sin asignar')}</span>${lim}${t.origen?`<span class="orig">${esc(t.origen)}</span>`:''}</span></button>
-  </div>`;
-}
-function vTareas(){
-  let list = [...TAR].sort(sortTareas);
-  if(S.tFiltro==='abiertas') list = list.filter(t=>t.estado!=='hecho');
-  if(S.tFiltro==='mias') list = list.filter(t=>t.resp===miNombre() && t.estado!=='hecho');
-  if(S.tFiltro==='hechas') list = list.filter(t=>t.estado==='hecho');
-  const F_ = (v,l) => `<button class="fchip ${S.tFiltro===v?'on':''}" onclick="S.tFiltro='${v}';render()">${l}</button>`;
-  return `
-  <div class="toprow"><h1>Tareas y pendientes</h1><button class="btn sm dark" onclick="nuevaTarea()">+ Tarea</button></div>
-  <p class="hint" style="margin:-6px 2px 0">Tocá el estado para avanzarlo: Pendiente → En proceso → Hecho.</p>
-  <div class="filters">${F_('abiertas','Abiertas')}${F_('mias','Mías')}${F_('hechas','Hechas')}${F_('todas','Todas')}</div>
-  <div style="margin-top:12px">${list.map(taskCard).join('') || '<div class="empty">No hay tareas en esta lista.</div>'}</div>`;
-}
-const tareaFila = t => ({id:t.id, titulo:t.titulo, estado:t.estado, responsable:t.resp, limite:t.limite, origen:t.origen, creada:t.creada, creadapor:t.creadapor});
-async function cicloTarea(id){
-  const t = TAR.find(x=>x.id===id); if(!t) return; const antes = t.estado;
-  t.estado = {pendiente:'proceso',proceso:'hecho',hecho:'pendiente'}[t.estado]; render();
-  try { await guardarFila(HOJA_TAR, {id:t.id, estado:t.estado}, `Tarea «${t.titulo.slice(0,60)}» → ${TSTATE[t.estado]}`, true);
-    const r = RAW.tar.find(x=>String(x.id)===id); if(r) r.estado = t.estado; toast(`${TSTATE[t.estado]}: ${t.titulo.slice(0,40)}`); }
-  catch(e){ t.estado = antes; render(); estado(errorGuardar(e), true); }
-}
-function nuevaTarea(origen=''){ S.task = {id:null, titulo:'', estado:'pendiente', resp:'', limite:'', origen}; formTarea(); }
-function editarTarea(id){ S.task = {...TAR.find(x=>x.id===id)}; formTarea(); }
-function formTarea(){
-  const t = S.task;
-  openSheet(`
-    <div class="sh-h"><h2>${t.id?'Editar tarea':'Nueva tarea'}</h2><button class="x" onclick="closeSheet()">✕</button></div>
-    <div class="sh-b">
-      ${t.origen?`<p style="margin:0 2px 8px"><span class="orig">${esc(t.origen)}</span></p>`:''}
-      <label class="lbl">¿Qué hay que hacer?</label>
-      <textarea id="tTit" style="min-height:80px" placeholder="Ej: Llamar al médico por el control de…">${esc(t.titulo)}</textarea>
-      <label class="lbl">Responsable <small>(opcional)</small></label>
-      <input id="tResp" class="inp" list="dlPersonas" value="${esc(t.resp)}" placeholder="Sin asignar">
-      <label class="lbl">Fecha límite <small>(opcional)</small></label>
-      <input id="tLim" class="inp" type="date" value="${esc(t.limite)}">
-      <label class="lbl">Estado</label>
-      <div class="seg3" id="tEst">${Object.entries(TSTATE).map(([v,l])=>`<button type="button" data-v="${v}" class="${t.estado===v?'on':''}" onclick="S.task.estado='${v}';document.querySelectorAll('#tEst button').forEach(b=>b.classList.toggle('on',b.dataset.v==='${v}'))">${l}</button>`).join('')}</div>
-      <p class="err" id="tErr"></p>
-      <div id="tDel"></div>
-    </div>
-    <div class="sh-foot">${t.id && isAdmin()?`<button class="btn ghost-d" onclick="confirmarBorrarTarea()">Eliminar</button>`:''}<button class="btn primary" id="tSave" onclick="guardarTarea()">Guardar tarea</button></div>`);
-  if(!t.id) setTimeout(()=>$('tTit')?.focus(), 250);
-}
-async function guardarTarea(){
-  const t = S.task, err = $('tErr'); t.titulo = $('tTit').value.trim(); t.resp = $('tResp').value.trim(); t.limite = $('tLim').value;
-  if(!t.titulo){ err.textContent = 'Escribí qué hay que hacer.'; err.style.display='block'; return; }
-  const nueva = !t.id; if(nueva){ t.id = nid('t'); t.creada = aHoja(new Date()); t.creadapor = miNombre(); }
-  const b = $('tSave'); b.disabled = true; b.textContent = 'Guardando…';
-  try { await guardarFila(HOJA_TAR, tareaFila(t), (nueva?'Nueva tarea: ':'Editó tarea: ')+t.titulo.slice(0,80), !nueva);
-    const r = tareaFila(t); const i = RAW.tar.findIndex(x=>String(x.id)===t.id); if(i>=0) RAW.tar[i] = Object.assign(RAW.tar[i], r); else RAW.tar.push(r);
-    closeSheet(); armar(); toast('Tarea guardada'); }
-  catch(e){ if(nueva) t.id = null; err.textContent = errorGuardar(e); err.style.display='block'; b.disabled = false; b.textContent = 'Guardar tarea'; }
-}
-function confirmarBorrarTarea(){ $('tDel').innerHTML = `<div class="archived" style="background:var(--urg-bg);border-color:#F0B9B2">¿Eliminar esta tarea? <div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" onclick="$('tDel').innerHTML=''">No</button><button class="btn sm danger" onclick="borrarTarea()">Sí, eliminar</button></div></div>`; }
-async function borrarTarea(){ const t = S.task;
-  try { await borrarFila(HOJA_TAR, t.id, 'Borró tarea: '+t.titulo.slice(0,80)); RAW.tar = RAW.tar.filter(x=>String(x.id)!==t.id); closeSheet(); armar(); toast('Tarea eliminada'); }
-  catch(e){ $('tErr').textContent = errorGuardar(e); $('tErr').style.display='block'; } }
-
-/* ============ Registro: alta / edición / detalle ============ */
-function nuevoRegistro(pre={}){
-  if(S.view==='internos' && S.intSel && !pre.internos){ const i = BYID[S.intSel]; if(i && i.estado==='Activo') pre.internos = [i.id]; }
-  S.form = {id:null, fecha:new Date(), cat:pre.cat||'', internos:pre.internos||[], personal:'', prio:'normal', texto:''};
-  formRegistro();
-}
-function editarRegistro(id){ const r = REGS.find(x=>x.id===id); S.form = {...r, internos:[...r.internos]}; formRegistro(); }
-function formRegistro(){
-  const f = S.form, acts = activos();
-  const extra = f.internos.filter(id=>!acts.find(a=>a.id===id)).map(id=>BYID[id]).filter(Boolean);
-  openSheet(`
-    <div class="sh-h"><h2>${f.id?'Editar registro':'Nuevo registro'}</h2><button class="x" onclick="closeSheet()">✕</button></div>
-    <div class="sh-b">
-      <div class="meta-row"><span>🕒</span><input id="fFecha" type="datetime-local" value="${toLocalInput(f.fecha)}" aria-label="Fecha y hora"><span class="who">por <b>${esc((f.id?f.operador:miNombre()).split(' ')[0])}</b></span></div>
-      <label class="lbl">Categoría</label>
-      <div class="catgrid" id="fCat">${Object.entries(CATS).map(([k,c])=>`<button type="button" class="cbtn ${f.cat===k?'on':''}" data-v="${k}" style="--cc:${c.color}" onclick="selCat('${k}')"><b>${c.icon} ${c.label}</b><span>${c.hint}</span></button>`).join('')}</div>
-      <label class="lbl">Interno(s) involucrado(s) <small>solo activos</small></label>
-      ${acts.length>14?`<input class="search" style="margin:0 0 8px" placeholder="Buscar interno…" oninput="filtrarChips(this.value)">`:''}
-      <div class="chips" id="fInt">
-        <button type="button" class="chip gen ${f.internos.length?'':'on'}" data-v="gen" onclick="togInt('gen')">Ninguno / General</button>
-        ${acts.map(i=>`<button type="button" class="chip ${f.internos.includes(i.id)?'on':''}" data-v="${esc(i.id)}" data-n="${esc(i.nombre.toLowerCase())}" onclick="togInt('${esc(i.id)}')">${esc(shortName(i.nombre))}</button>`).join('')}
-        ${extra.map(i=>`<button type="button" class="chip on" data-v="${esc(i.id)}" onclick="togInt('${esc(i.id)}')">${esc(shortName(i.nombre))} (egreso)</button>`).join('')}
-      </div>
-      <label class="lbl">Personal / operador involucrado <small>(opcional)</small></label>
-      <input id="fPers" class="inp" list="dlPersonas" value="${esc(f.personal)}" placeholder="Nadie del equipo">
-      <label class="lbl">Prioridad</label>
-      <div class="seg3" id="fPrio">${Object.entries(PRIOS).map(([k,l])=>`<button type="button" data-v="${k}" class="${f.prio===k?'on':''}" onclick="selPrio('${k}')">${k==='urgente'?'⚠ ':''}${l}</button>`).join('')}</div>
-      <p class="hint" id="prioHint">${f.prio==='urgente'?'Va a aparecer arriba de todo en la Reunión de viernes.':'Urgente / Delicado: riesgo de abandono, amenaza de denuncia, conflicto grave.'}</p>
-      <label class="lbl">Descripción</label>
-      <textarea id="fTxt" placeholder="Qué pasó, quién, qué se hizo… Podés dictar con el 🎤 del teclado." oninput="S.form.texto=this.value">${esc(f.texto)}</textarea>
-      <p class="err" id="fErr"></p>
-    </div>
-    <div class="sh-foot"><button class="btn primary" id="fSave" style="padding:16px" onclick="guardarRegistro()">Guardar registro</button></div>`);
-}
-function filtrarChips(q){ q = q.trim().toLowerCase(); document.querySelectorAll('#fInt .chip[data-n]').forEach(b => b.hidden = q && !b.dataset.n.includes(q) && !b.classList.contains('on')); }
-function selCat(k){ S.form.cat = k; document.querySelectorAll('#fCat .cbtn').forEach(b=>b.classList.toggle('on', b.dataset.v===k)); }
-function togInt(id){
-  const f = S.form;
-  if(id==='gen') f.internos = []; else f.internos = f.internos.includes(id) ? f.internos.filter(x=>x!==id) : [...f.internos, id];
-  document.querySelectorAll('#fInt .chip').forEach(b=>b.classList.toggle('on', b.dataset.v==='gen' ? !f.internos.length : f.internos.includes(b.dataset.v)));
-}
-function selPrio(k){ S.form.prio = k; document.querySelectorAll('#fPrio button').forEach(b=>b.classList.toggle('on', b.dataset.v===k));
-  $('prioHint').textContent = k==='urgente'?'Va a aparecer arriba de todo en la Reunión de viernes.':'Urgente / Delicado: riesgo de abandono, amenaza de denuncia, conflicto grave.'; }
-async function guardarRegistro(){
-  const f = S.form, err = $('fErr');
-  f.texto = $('fTxt').value.trim(); f.personal = $('fPers').value.trim();
-  const fe = $('fFecha').value; if(fe) f.fecha = new Date(fe);
-  if(!f.cat){ err.textContent = 'Elegí una categoría.'; err.style.display='block'; return; }
-  if(!f.texto){ err.textContent = 'Escribí una descripción breve.'; err.style.display='block'; $('fTxt').focus(); return; }
-  const nuevo = !f.id;
-  const ps = f.internos.map(id=>BYID[id]).filter(Boolean);
-  const rec = { id: f.id || nid('b'), fecha: aHoja(f.fecha), categoria:f.cat, prioridad:f.prio,
-    internos: ps.map(p=>p.id).join(','), nombres: ps.map(p=>p.nombre).join(' | '), cedulas: ps.map(p=>p.cedula).join(','),
-    personal:f.personal, texto:f.texto };
-  if(nuevo){ rec.operador = miNombre(); rec.email = email; } else rec.editado = aHoja(new Date()) + ' por ' + miNombre();
-  const b = $('fSave'); b.disabled = true; b.textContent = 'Guardando…';
+async function guardarNota(id, editId){
+  const txt = $('aTxt').value.trim(), err = $('aErr');
+  if(!txt){ err.textContent = 'Escribí qué pasó.'; err.style.display = 'block'; $('aTxt').focus(); return; }
+  const urg = $('aUrg').checked;
+  let rec;
+  if(editId){ rec = {id:editId, texto:txt, prioridad: urg ? 'urgente' : 'normal', editado: aHoja(new Date()) + ' por ' + miNombre()}; }
+  else { const p = id ? BYID[id] : null;
+    rec = { id:nid('b'), fecha:aHoja(new Date()), categoria: p ? 'conducta' : 'general', prioridad: urg ? 'urgente' : 'normal',
+      internos: p ? p.id : '', nombres: p ? p.nombre : '', cedulas: p ? p.cedula : '', personal:'', texto:txt, operador:miNombre(), email }; }
+  const b = $('aSave'); b.disabled = true; b.textContent = 'Guardando…';
   try {
-    await guardarFila(HOJA_BIT, rec, (nuevo?'Bitácora: ':'Editó bitácora: ') + CATS[f.cat].short + (ps.length?' · '+ps.map(p=>p.nombre).join(', '):''), !nuevo);
-    const i = RAW.reg.findIndex(x=>String(x.id)===rec.id); if(i>=0) RAW.reg[i] = Object.assign({}, RAW.reg[i], rec); else RAW.reg.push(rec);
-    closeSheet(); armar(); guardarCache();
-    toast(f.prio==='urgente' ? 'Guardado como alerta urgente para la reunión del viernes' : 'Registro guardado');
-  } catch(e){ err.textContent = errorGuardar(e); err.style.display='block'; b.disabled = false; b.textContent = 'Guardar registro'; }
+    await guardarFila(HOJA_BIT, rec, editId ? 'Editó una nota de la bitácora' : 'Bitácora: ' + (rec.nombres || 'General'), !!editId);
+    const i = RAW.reg.findIndex(x => String(x.id)===rec.id); if(i >= 0) RAW.reg[i] = Object.assign({}, RAW.reg[i], rec); else RAW.reg.push(rec);
+    closeSheet(); armar(); guardarCache(); toast(urg ? '✓ Guardado como urgente' : '✓ Guardado');
+  } catch(e){ err.textContent = errorGuardar(e); err.style.display = 'block'; b.disabled = false; b.textContent = 'Guardar'; }
 }
-function verRegistro(id){
-  const r = REGS.find(x=>x.id===id); if(!r) return; const c = CATS[r.cat];
-  const ints = r.internos.length ? r.internos.map(x=>{const i=BYID[x]; return i?`${esc(i.nombre)}${i.estado!=='Activo'?` <span class="est ${estCls(i.estado)}">${esc(i.estado)}</span>`:''}`:''}).join('<br>') : 'Ninguno / General';
+
+function ver(id){
+  const r = REGS.find(x => x.id===id); if(!r) return;
   const puede = !r.sistema && (isAdmin() || (r.email && r.email===email));
   openSheet(`
-    <div class="sh-h"><h2 style="color:${c.color}">${c.icon} ${c.label}</h2><button class="x" onclick="closeSheet()">✕</button></div>
+    <div class="sh-h"><h2>${esc(quien(r))}</h2><button class="x" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
     <div class="sh-b">
-      <div>${prioBadge(r.prio)} ${r.sistema?'<span class="sys">Automático</span>':''}</div>
-      <div class="full-d">${esc(r.texto)}</div>
-      <dl class="kv">
-        <dt>Fecha</dt><dd>${fDate(r.fecha)}/${r.fecha.getFullYear()} · ${fTime(r.fecha)}</dd>
-        <dt>Registró</dt><dd>${esc(r.sistema?'App de Internos':r.operador)}</dd>
-        <dt>Interno(s)</dt><dd>${ints}</dd>
-        ${r.personal?`<dt>Personal</dt><dd>${esc(r.personal)}</dd>`:''}
-        <dt>Prioridad</dt><dd>${PRIOS[r.prio]}</dd>
-        ${r.editado?`<dt>Editado</dt><dd>${esc(r.editado)}</dd>`:''}
-      </dl>
-      <p class="err" id="rErr"></p>
-      <div id="rDel"></div>
+      ${r.prio==='urgente'?'<span class="tag">⚠ Urgente</span>':''}
+      <div class="texto">${esc(r.texto)}</div>
+      <p class="meta">${fDate(r.fecha)}/${r.fecha.getFullYear()} a las ${fTime(r.fecha)} · ${r.sistema ? 'automático' : 'anotó ' + esc(r.operador)}${r.editado ? '<br>Editado: ' + esc(r.editado) : ''}</p>
+      <p class="err" id="vErr"></p><div id="vDel"></div>
     </div>
-    ${puede?`<div class="sh-foot">${isAdmin()?`<button class="btn ghost-d" onclick="confirmarBorrarReg('${esc(r.id)}')">Eliminar</button>`:''}<button class="btn primary" onclick="editarRegistro('${esc(r.id)}')">Editar</button></div>`:''}`);
+    ${puede ? `<div class="sh-foot">${isAdmin() ? `<button class="btn rojo" onclick="confirmarBorrar('${esc(r.id)}')">Borrar</button>` : ''}<button class="btn primary" onclick="editar('${esc(r.id)}')">Corregir</button></div>` : ''}`);
 }
-function confirmarBorrarReg(id){ $('rDel').innerHTML = `<div class="archived" style="background:var(--urg-bg);border-color:#F0B9B2">¿Eliminar este registro? Se borra de la planilla y no se puede deshacer. <div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" onclick="$('rDel').innerHTML=''">No</button><button class="btn sm danger" onclick="borrarReg('${esc(id)}')">Sí, eliminar</button></div></div>`; }
-async function borrarReg(id){
-  try { await borrarFila(HOJA_BIT, id, 'Borró un registro de la bitácora'); RAW.reg = RAW.reg.filter(x=>String(x.id)!==id); closeSheet(); armar(); guardarCache(); toast('Registro eliminado'); }
-  catch(e){ $('rErr').textContent = errorGuardar(e); $('rErr').style.display='block'; } }
+function editar(id){
+  const r = REGS.find(x => x.id===id);
+  openSheet(`
+    <div class="sh-h"><h2>Corregir · ${esc(quien(r))}</h2><button class="x" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
+    <div class="sh-b">
+      <textarea id="aTxt">${esc(r.texto)}</textarea>
+      <label class="urgbox"><input type="checkbox" id="aUrg" ${r.prio==='urgente'?'checked':''}><span><b>⚠ Es urgente</b><small>Sale primero en el resumen del viernes.</small></span></label>
+      <p class="err" id="aErr"></p>
+    </div>
+    <div class="sh-foot"><button class="btn primary grande" id="aSave" onclick="guardarNota('', '${esc(r.id)}')">Guardar cambios</button></div>`);
+}
+function confirmarBorrar(id){ $('vDel').innerHTML = `<div class="confirmar">¿Borrar esta nota? No se puede deshacer.<div><button class="btn" onclick="$('vDel').innerHTML=''">No</button><button class="btn rojo" onclick="borrarNota('${esc(id)}')">Sí, borrar</button></div></div>`; }
+async function borrarNota(id){
+  try { await borrarFila(HOJA_BIT, id, 'Borró una nota de la bitácora'); RAW.reg = RAW.reg.filter(x => String(x.id)!==id); closeSheet(); armar(); guardarCache(); toast('Nota borrada'); }
+  catch(e){ $('vErr').textContent = errorGuardar(e); $('vErr').style.display = 'block'; }
+}
 
-/* ============ Menú del usuario ============ */
+/* ---- INTERNOS ---- */
+function vInternos(){
+  const lista = V.verEgr ? bajas() : activos(), wk = weekRange(0);
+  return `
+  <h1>${V.verEgr ? 'Los que ya se fueron' : 'Internos'}</h1>
+  <p class="nota">${V.verEgr ? 'Solo para consultar: todo lo que se anotó de ellos queda guardado.' : 'La lista viene sola de la app de Internos. Tocá un nombre para ver todo lo anotado.'}</p>
+  ${lista.length > 10 ? `<input class="buscar" type="search" placeholder="🔍 Buscar nombre…" oninput="filtrarNombres(this.value)">` : ''}
+  ${lista.map(p => { const n = REGS.filter(r => r.internos.includes(p.id) && !r.sistema).length, s = REGS.filter(r => r.internos.includes(p.id) && !r.sistema && inRange(r.fecha, wk)).length;
+    return `<button class="fila" data-n="${esc(p.nombre.toLowerCase())}" onclick="V.intSel='${esc(p.id)}';render();scrollTo(0,0)"><b>${esc(p.nombre)}</b><span>${V.verEgr ? esc(p.estado) + (p.baja ? ' · ' + fDateY(p.baja) : '') : (s ? s + ' esta semana' : '')}${V.verEgr ? '' : ''}</span><i>›</i></button>`; }).join('') || '<div class="vacio">No hay nadie en esta lista.</div>'}
+  <button class="btn full suave" style="margin-top:14px" onclick="V.verEgr=!V.verEgr;render();scrollTo(0,0)">${V.verEgr ? '‹ Volver a los internos' : `Ver los que ya se fueron (${bajas().length})`}</button>`;
+}
+function vPersona(){
+  const p = BYID[V.intSel]; if(!p){ V.intSel = null; return vInternos(); }
+  const regs = REGS.filter(r => r.internos.includes(p.id)), act = p.estado==='Activo';
+  return `
+  <button class="volver" onclick="V.intSel=null;render()">‹ Volver</button>
+  <h1 style="margin-bottom:4px">${esc(p.nombre)}</h1>
+  <p class="nota">${act ? (p.ingreso ? `Ingresó el ${fDateY(p.ingreso)} · mes ${mesDe(p.ingreso)} de ${DUR_MESES}` : '') : `<span class="tag gris">${esc(p.estado)}</span> ${p.baja ? 'el ' + fDateY(p.baja) : ''}`}</p>
+  ${act ? `<button class="btn primary full grande" onclick="anotar('${esc(p.id)}')">✏️ Anotar algo de ${esc(p.nombre.split(' ')[0])}</button>` : ''}
+  ${(() => { const m = medDe(p.id, midnight(new Date()), new Date(Date.now() + 365*DAY)); return m.length ? `<h2>🩺 Próximos médicos</h2><div class="bloque">${m.map(t => `<div class="ln">${esc(medTxt(t))}</div>`).join('')}</div>` : ''; })()}
+  <h2>Todo lo anotado (${regs.length})</h2>
+  ${regs.map(r => item(r, false)).join('') || '<div class="vacio">Todavía no hay nada anotado.</div>'}`;
+}
+
+/* ---- VIERNES: resumen de la semana + pendientes ---- */
+function semanaDatos(){
+  const rng = weekRange(V.semana), [s, e] = rng;
+  const regs = REGS.filter(r => inRange(r.fecha, rng)).sort((a,b) => a.fecha - b.fecha);
+  const urg = regs.filter(r => r.prio==='urgente');
+  const resto = regs.filter(r => r.prio!=='urgente');
+  const gente = PERS.filter(p => resto.some(r => r.internos.includes(p.id))).sort(porIngreso)
+    .map(p => ({p, regs: resto.filter(r => r.internos.includes(p.id))}));
+  const general = resto.filter(r => !r.internos.length);
+  const sinNada = activos().filter(p => !regs.some(r => r.internos.includes(p.id)));
+  // Médicos: en la semana actual, los que vienen (hasta el viernes siguiente al cambio de guardia); en semanas pasadas, los de esa semana
+  const actual = V.semana===0, mDesde = actual ? midnight(new Date()) : s, mHasta = actual ? new Date(e.getTime() + 7*DAY) : e;
+  const meds = MED.filter(t => t.fecha>=mDesde && t.fecha<mHasta && (!actual || t.estado==='pendiente'));
+  return {s, e, regs, urg, gente, general, sinNada, meds, actual};
+}
+function vViernes(){
+  const W = semanaDatos(), enCurso = new Date() >= W.s && new Date() < W.e;
+  const pend = TAR.filter(t => t.estado!=='hecho'), hechos = TAR.filter(t => t.estado==='hecho').slice(-10).reverse();
+  const linea = r => `<button class="ln" onclick="ver('${esc(r.id)}')"><span>${fDate(r.fecha)}</span>${esc(r.texto)}</button>`;
+  return `
+  <div class="semana">
+    <button onclick="V.semana--;render()" aria-label="Semana anterior">‹</button>
+    <div><b>Semana del ${fDate(W.s)} al ${fDate(W.e)}</b>${enCurso ? '<small>esta semana</small>' : ''}</div>
+    <button onclick="V.semana++;render()" ${V.semana >= 0 ? 'disabled' : ''} aria-label="Semana siguiente">›</button>
+  </div>
+  <button class="btn wa full grande" onclick="copiarWA()">📋 Copiar resumen para WhatsApp</button>
+
+  <h2 class="rojo">⚠ Urgente (${W.urg.length})</h2>
+  ${W.urg.map(r => item(r)).join('') || '<div class="vacio">Nada urgente esta semana.</div>'}
+
+  <h2>🩺 Médicos ${W.actual ? 'que vienen' : 'de esa semana'} (${W.meds.length})</h2>
+  ${W.meds.length ? `<div class="bloque">${W.meds.map(t => `<div class="ln"><b>${esc(t.nombre)}</b><span>${esc(medTxt(t))}${estMed(t)}</span></div>`).join('')}</div>` : `<div class="vacio">${W.actual ? 'No hay médicos anotados para estos días.' : 'No hubo médicos esa semana.'}</div>`}
+  <a class="link" data-pasa href="${URL_MED}">Abrir la app de Médicos ›</a>
+
+  <h2>Por persona</h2>
+  ${W.gente.map(g => `<div class="bloque"><b>${esc(g.p.nombre)}${g.p.estado!=='Activo' ? ` <span class="tag gris">${esc(g.p.estado)}</span>` : ''}</b>${g.regs.map(linea).join('')}</div>`).join('') || '<div class="vacio">Sin novedades de internos.</div>'}
+  ${W.sinNada.length && V.semana===0 ? `<p class="nota">Sin nada anotado esta semana: ${W.sinNada.map(p => esc(p.nombre)).join(', ')}.</p>` : ''}
+
+  <h2>🏠 General</h2>
+  ${W.general.length ? `<div class="bloque">${W.general.map(linea).join('')}</div>` : '<div class="vacio">Sin novedades generales.</div>'}
+
+  <h2>📋 Pendientes (${pend.length})</h2>
+  <div class="bloque">
+    ${pend.map(t => `<label class="pd"><input type="checkbox" onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('') || '<p class="nota" style="margin:6px 0">No hay pendientes.</p>'}
+    <div class="nuevo"><input id="pNuevo" placeholder="Agregar un pendiente…" onkeydown="if(event.key==='Enter')agregarPend()"><button class="btn primary" onclick="agregarPend()">Agregar</button></div>
+  </div>
+  ${hechos.length ? `<button class="btn full suave" onclick="V.verHechos=!V.verHechos;render()">${V.verHechos ? 'Ocultar' : 'Ver'} los últimos hechos (${hechos.length})</button>
+    ${V.verHechos ? `<div class="bloque">${hechos.map(t => `<label class="pd hecho"><input type="checkbox" checked onchange="marcar('${esc(t.id)}', this.checked)"><span>${esc(t.titulo)}</span></label>`).join('')}</div>` : ''}` : ''}`;
+}
+async function agregarPend(){
+  const inp = $('pNuevo'), t = inp.value.trim(); if(!t){ inp.focus(); return; }
+  const rec = {id:nid('t'), titulo:t, estado:'pendiente', responsable:'', limite:'', origen:'Semana del ' + fDate(weekRange(0)[0]), creada:aHoja(new Date()), creadapor:miNombre()};
+  inp.disabled = true;
+  try { await guardarFila(HOJA_TAR, rec, 'Nuevo pendiente: ' + t.slice(0,80), false); RAW.tar.push(rec); armar(); toast('✓ Pendiente agregado'); setTimeout(() => $('pNuevo')?.focus(), 50); }
+  catch(e){ inp.disabled = false; estado(errorGuardar(e), true); }
+}
+async function marcar(id, hecho){
+  const t = TAR.find(x => x.id===id); if(!t) return;
+  const nuevo = hecho ? 'hecho' : 'pendiente';
+  try { await guardarFila(HOJA_TAR, {id, estado:nuevo}, (hecho ? 'Hecho: ' : 'Volvió a pendiente: ') + t.titulo.slice(0,80), true);
+    const r = RAW.tar.find(x => String(x.id)===id); if(r) r.estado = nuevo; armar(); toast(hecho ? '✓ Hecho' : 'Vuelve a pendientes'); }
+  catch(e){ render(); estado(errorGuardar(e), true); }
+}
+function textoWA(){
+  const W = semanaDatos(), corto = n => shortName(n), clip = t => t.length > 220 ? t.slice(0,217).trimEnd() + '…' : t;
+  const q = r => r.internos.length ? r.internos.map(id => corto(BYID[id].nombre)).join(', ') : 'General';
+  const L = [`*ALAS DE LIBERTAD*`, `Semana del ${fDate(W.s)} al ${fDate(W.e)}`, ''];
+  L.push('⚠ *URGENTE*'); W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${clip(r.texto)}`)); if(!W.urg.length) L.push('• Nada urgente.');
+  L.push('', '🩺 *MÉDICOS*'); W.meds.forEach(t => L.push(`• *${corto(t.nombre)}*: ${medTxt(t)}${estMed(t)}`)); if(!W.meds.length) L.push('• No hay médicos anotados.');
+  L.push('', '👥 *POR PERSONA*'); W.gente.forEach(g => { L.push(`*${corto(g.p.nombre)}*`); g.regs.forEach(r => L.push(`– ${fDate(r.fecha)}: ${clip(r.texto)}`)); }); if(!W.gente.length) L.push('• Sin novedades.');
+  L.push('', '🏠 *GENERAL*'); W.general.forEach(r => L.push(`• ${fDate(r.fecha)}: ${clip(r.texto)}`)); if(!W.general.length) L.push('• Sin novedades.');
+  const pend = TAR.filter(t => t.estado!=='hecho'); L.push('', '📋 *PENDIENTES*'); pend.forEach(t => L.push(`☐ ${t.titulo}`)); if(!pend.length) L.push('• No hay.');
+  return L.join('\n');
+}
+async function copiarWA(){
+  const t = textoWA(); let ok = false;
+  try { await navigator.clipboard.writeText(t); ok = true; } catch(e){}
+  if(ok){ toast('✓ Copiado. Pegalo en el grupo de WhatsApp.'); return; }
+  openSheet(`<div class="sh-h"><h2>Resumen</h2><button class="x" onclick="closeSheet()">✕</button></div>
+    <div class="sh-b"><p class="nota">Mantené apretado el texto, elegí "Seleccionar todo" y "Copiar".</p><textarea readonly style="min-height:360px;font-size:14px">${esc(t)}</textarea></div>`);
+}
+
+/* ---- menú del usuario ---- */
 let instalar = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalar = e; });
 window.addEventListener('appinstalled', () => { instalar = null; toast('Bitácora instalada'); });
@@ -955,29 +671,26 @@ function abrirMenu(){
   openSheet(`
     <div class="sh-h"><h2>Tu usuario</h2><button class="x" onclick="closeSheet()">✕</button></div>
     <div class="sh-b">
-      <div class="oprow on"><span class="av">${esc(initials(miNombre()))}</span><b>${esc(email)}</b><span class="gtag">${esc(role||'—')}</span></div>
-      <label class="lbl">Cómo figurás en la bitácora</label>
-      <div style="display:flex;gap:8px"><input id="mNom" class="inp" value="${esc(miNombre())}" maxlength="40"><button class="btn" onclick="guardarNombre()">Guardar</button></div>
-      <p class="hint">Se usa en cada registro nuevo (ej.: "Nicolás R.").</p>
-      <div class="sec-t">App</div>
-      <div style="display:grid;gap:8px">
-        ${instalar?`<button class="btn full" onclick="instalarApp()">⬇ Instalar Bitácora en este dispositivo</button>`:''}
-        <button class="btn full" onclick="closeSheet();cargar().then(()=>toast('Actualizado')).catch(e=>estado('No se pudo actualizar: '+e.message,true))">↻ Actualizar ahora</button>
-        <a class="btn full" data-internos href="https://reboirasnicolas4-dev.github.io/registro-k7x2/" style="text-align:center;text-decoration:none;color:inherit">Ir a la app de Internos</a>
-        <button class="btn full ghost-d" onclick="salir()">Salir</button>
+      <p class="nota" style="margin-top:0">${esc(email)}</p>
+      <h3>Tu nombre en las notas</h3>
+      <div class="nuevo"><input id="mNom" value="${esc(miNombre())}" maxlength="40"><button class="btn primary" onclick="guardarNombre()">Guardar</button></div>
+      <div style="display:grid;gap:10px;margin-top:20px">
+        ${instalar ? `<button class="btn full" onclick="instalarApp()">⬇ Instalar en este celular</button>` : ''}
+        <button class="btn full" onclick="closeSheet();cargar().then(()=>toast('Actualizado')).catch(e=>estado('No se pudo actualizar: '+e.message,true))">↻ Actualizar</button>
+        <a class="btn full" data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/">Ir a la app de Internos</a>
+        <a class="btn full" data-pasa href="${URL_MED}">Ir a la app de Médicos</a>
+        <button class="btn full rojo-t" onclick="salir()">Salir</button>
       </div>
     </div>`);
 }
-function guardarNombre(){ const v = $('mNom').value.trim(); if(!v) return; try { localStorage.setItem('alas-bit-nombre', v); } catch(e){} closeSheet(); render(); toast('Listo: vas a figurar como '+v); }
+function guardarNombre(){ const v = $('mNom').value.trim(); if(!v) return; try { localStorage.setItem('alas-bit-nombre', v); } catch(e){} closeSheet(); render(); toast('Vas a figurar como ' + v); }
 async function instalarApp(){ if(!instalar) return; instalar.prompt(); try { await instalar.userChoice; } catch(e){} instalar = null; closeSheet(); }
 function salir(){ closeSheet(); cerrarSesion(); email=''; role=''; RAW.int=[]; RAW.egr=[]; RAW.reg=[]; RAW.tar=[]; PERS=[]; REGS=[]; TAR=[]; $('lmsg').textContent=''; mostrar(false); modoSetup(false); }
 
-/* ============ Sheet / toast ============ */
-function openSheet(html){ $('sheet').innerHTML = html; $('sheetWrap').hidden = false; document.body.style.overflow='hidden'; }
-function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow=''; }
+function openSheet(html){ $('sheet').innerHTML = html; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
+function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
-function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(()=>el.classList.remove('show'), 2800); }
-
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(() => el.classList.remove('show'), 2600); }
 /* ============ Ingreso (igual que Internos y Cuartos) ============ */
 function modoSetup(on, codigo){ $('setup').hidden = !on; $('pwrow').hidden = on; $('coderow').hidden = !(on && codigo); if(!on) $('ncode').value = '';
   $('ltxt').textContent = on ? (codigo ? 'Escribí el código que te pasaron y elegí tu contraseña nueva.' : 'Es tu primera vez: elegí una contraseña para tu usuario.') : 'Ingresá con el mismo correo y contraseña de la app de Internos.';
