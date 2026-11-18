@@ -142,6 +142,7 @@ a.b{display:block}
 .muted{color:var(--mut)}.soft{color:var(--mut)}
 .avisos{background:var(--soft);border:1px solid var(--acc);border-radius:14px;padding:12px;margin-bottom:12px}
 .avisos b{display:block;font-size:15.5px;color:var(--acc)}.avisos span{display:block;color:#f3d9a8;font-size:13.5px;margin-top:3px}.avisos .btns{margin-top:10px}
+.egr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}.egr div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 10px}.egr span{display:block;font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.egr b{font-size:15px}
 </style>
 </head>
 <body>
@@ -466,12 +467,13 @@ function estado(t, err){ const e = $('estado'); e.textContent = t || ''; e.class
 
 /* ---- cómo se lee cada nota (también las anotadas con la versión anterior) ---- */
 const esReunion = r => r.categoria==='reunion';
-function tipoDe(r){ if(r.sistema || r.prio==='urgente' || r.categoria==='urgente') return 'urgente';
+function tipoDe(r){ if(r.prio==='urgente' || r.categoria==='urgente') return 'urgente';
   if(/^famil/.test(r.categoria)) return 'familiar'; if(r.categoria==='comunidad' || r.categoria==='general') return 'comunidad'; return 'interno'; }
 function quienDe(r){ if(r.internos.length) return r.internos[0];
   if(r.quienTipo==='operador' || (r.categoria==='equipo' && r.personal)) return 'op:' + (r.personal || 'Equipo'); return 'com'; }
 const nombreDe = q => q==='com' ? '🏠 Comunidad' : q.startsWith('op:') ? '🧑‍💼 ' + q.slice(3) : (BYID[q] ? BYID[q].nombre : '—');
-const notas = () => REGS.filter(r => !r.anulado && !esReunion(r));          // las anuladas quedan guardadas pero no se muestran
+const notas = () => REGS.filter(r => !r.anulado && !esReunion(r) && !r.sistema);   // los egresos van solo al archivo; las anuladas quedan guardadas pero no se muestran
+const deEgresado = r => { const p = BYID[quienDe(r)]; return !!p && p.estado!=='Activo'; };   // las notas de los que se fueron viven en el archivo
 const reuniones = () => REGS.filter(r => esReunion(r) && !r.anulado).sort((a,b) => b.fecha - a.fecha);
 const operadores = () => [...new Set([miNombre(), ...REGS.filter(r => !r.sistema).map(r => r.operador), ...REGS.filter(r => quienDe(r).startsWith('op:')).map(r => r.personal)].filter(Boolean))].sort((a,b) => a.localeCompare(b,'es'));
 const fh = fTime;
@@ -480,7 +482,7 @@ function render(){
   if($('app').hidden) return;
   $('main').innerHTML = {muro:vMuro, viernes:vViernes, internos:vInternos}[V.v]();
   const nb = document.querySelector('#nav [data-v=viernes]'); nb.querySelector('.badge')?.remove();
-  const u = notas().filter(r => tipoDe(r)==='urgente' && !r.sistema && inRange(r.fecha, weekRange(0))).length;
+  const u = notas().filter(r => tipoDe(r)==='urgente' && !deEgresado(r) && inRange(r.fecha, weekRange(0))).length;
   if(u) nb.insertAdjacentHTML('beforeend', `<span class="badge">${u}</span>`);
   $('meBtn').innerHTML = `<span class="av">${esc(initials(miNombre()))}</span>`;
 }
@@ -494,7 +496,7 @@ function porDia(lista, conQuien){ let h = '', last = '';
 
 /* ======== 1) BITÁCORA: muro con todo, del más nuevo al más viejo ======== */
 function vMuro(){
-  let L = notas(); if(V.filtro!=='todo') L = L.filter(r => tipoDe(r)===V.filtro);
+  let L = notas().filter(r => !deEgresado(r)); if(V.filtro!=='todo') L = L.filter(r => tipoDe(r)===V.filtro);
   const hoy = notas().filter(r => !r.sistema && dayDiff(new Date(), r.fecha)===0).length;
   // Lo urgente de la semana de guardia va siempre arriba de todo; el resto, en orden
   const wk = weekRange(0), arriba = V.filtro==='todo' ? L.filter(r => tipoDe(r)==='urgente' && inRange(r.fecha, wk)) : [];
@@ -580,7 +582,7 @@ async function anular(id){ const rec = {id, anulado: aHoja(new Date()) + ' por '
 /* ======== 2) VIERNES: la semana de guardia (viernes a viernes) ======== */
 function semana(){
   const rng = weekRange(V.semana), [s, e] = rng, L = notas().filter(r => !r.sistema && inRange(r.fecha, rng)).sort((a,b) => a.fecha - b.fecha);
-  const urg = L.filter(r => tipoDe(r)==='urgente'), resto = L.filter(r => tipoDe(r)!=='urgente');
+  const urg = L.filter(r => tipoDe(r)==='urgente' && !deEgresado(r)), resto = L.filter(r => !urg.includes(r));
   const porInt = PERS.filter(p => resto.some(r => quienDe(r)===p.id)).sort(porIngreso).map(p => ({p, L: resto.filter(r => quienDe(r)===p.id)}));
   const com = resto.filter(r => quienDe(r)==='com'), ops = resto.filter(r => quienDe(r).startsWith('op:'));
   const sin = V.semana===0 ? activos().filter(p => !L.some(r => quienDe(r)===p.id)) : [];
@@ -595,11 +597,10 @@ function vViernes(){
   return `<div class="ayuda">🗓️ La semana de guardia <b>de viernes a viernes</b>, ordenada para leer en 5 minutos en la reunión. Al terminar, tocá <b>✓ Semana pasada en la reunión</b> y queda guardada.</div>
   <div class="sem"><button onclick="V.semana--;render()" aria-label="Semana anterior">‹</button><div><b>Del ${fDate(W.s)} al ${fDate(W.e)}</b><span>${enCurso ? 'Semana en curso' : 'Reunión del ' + fDate(W.e)}</span></div><button onclick="V.semana++;render()" ${V.semana>=0?'disabled':''} aria-label="Semana siguiente">›</button></div>
   ${W.cerrada ? `<div class="hecha">✓ Pasada en la reunión · ${fDate(W.cerrada.fecha)} ${fh(W.cerrada.fecha)} · ${esc(W.cerrada.operador)}</div>` : ''}
-  <div class="kp"><div><b>${W.L.length}</b><span>novedades</span></div><div><b style="color:var(--urg)">${W.urg.length}</b><span>urgentes</span></div><div><b>${W.bajas.length}</b><span>egresos</span></div></div>
+  <div class="kp"><div><b>${W.L.length}</b><span>novedades</span></div><div><b style="color:var(--urg)">${W.urg.length}</b><span>urgentes</span></div><div><b>${W.porInt.length}</b><span>internos con novedades</span></div></div>
   <button class="b wa grande" onclick="copiar()">📋 Copiar resumen para WhatsApp</button>
   <div class="grp u">⚠ Urgente</div>
-  ${W.bajas.map(p => `<div class="n urg" style="--c:var(--urg)"><div class="n-h"><b>${esc(p.nombre)}</b><span class="t">🚪 Egreso</span><span class="hora">${fDate(p.baja)}</span></div><p>${esc(p.estado)} (desde la app de Internos)</p></div>`).join('')}
-  ${W.urg.map(r => tarjeta(r, true, true)).join('') || (W.bajas.length ? '' : '<div class="vacio">Nada urgente esta semana 👍</div>')}
+  ${W.urg.map(r => tarjeta(r, true, true)).join('') || '<div class="vacio">Nada urgente esta semana 👍</div>'}
   <div class="grp">👤 Por interno</div>
   ${W.porInt.map(x => `<div class="bl"><b>${esc(x.p.nombre)}${x.p.estado!=='Activo' ? ' <span class="est">' + esc(x.p.estado) + '</span>' : ''}</b>${x.L.map(ln).join('')}</div>`).join('') || '<div class="vacio">Sin novedades de internos.</div>'}
   ${W.sin.length ? `<div class="ayuda">Sin nada anotado esta semana: <b>${W.sin.map(p => esc(p.nombre)).join(', ')}</b>.</div>` : ''}
@@ -612,8 +613,7 @@ function vViernes(){
 function textoWA(){
   const W = semana(), q = r => { const k = quienDe(r); return k==='com' ? 'Comunidad' : k.startsWith('op:') ? k.slice(3) : shortName(BYID[k] ? BYID[k].nombre : '—'); };
   const L = ['*ALAS DE LIBERTAD · BITÁCORA*', `Semana del ${fDate(W.s)} al ${fDate(W.e)}`, '', '⚠ *URGENTE*'];
-  W.bajas.forEach(p => L.push(`• *${shortName(p.nombre)}*: egreso (${p.estado}) ${fDate(p.baja)}`));
-  W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${r.texto}`)); if(!W.urg.length && !W.bajas.length) L.push('• Nada urgente.');
+  W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${r.texto}`)); if(!W.urg.length) L.push('• Nada urgente.');
   L.push('', '👤 *POR INTERNO*'); W.porInt.forEach(x => { L.push(`*${shortName(x.p.nombre)}*`); x.L.forEach(r => L.push(`– ${TIPOS[tipoDe(r)].i} ${fDate(r.fecha)}: ${r.texto}`)); }); if(!W.porInt.length) L.push('• Sin novedades.');
   L.push('', '🏠 *COMUNIDAD*'); W.com.forEach(r => L.push(`• ${fDate(r.fecha)}: ${r.texto}`)); if(!W.com.length) L.push('• Sin novedades.');
   L.push('', '🧑‍💼 *OPERADORES*'); W.ops.forEach(r => L.push(`• ${r.personal} (${fDate(r.fecha)}): ${r.texto}`)); if(!W.ops.length) L.push('• Sin novedades.');
@@ -641,14 +641,15 @@ function vInternos(){
   const fil = lista.filter(p => !q || (p.nombre + ' ' + p.cedula).toLowerCase().includes(q));
   return `<div class="sync"><span class="dot"></span><div><b>Conectada a la app de Internos</b><br><span>Las altas y bajas aparecen solas · no se cargan acá</span></div></div>
   <div class="srch"><span>🔍</span><input placeholder="Buscar interno…" value="${esc(V.q)}" oninput="V.q=this.value;render();const i=document.querySelector('.srch input');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div>
-  ${V.egr ? '<div class="ayuda">🗄️ <b>Archivo:</b> los que ya se fueron. Su historial queda guardado para consultar.</div>' : ''}
+  ${V.egr ? '<div class="ayuda">🗄️ <b>Archivo de egresados:</b> los que ya se fueron, con el motivo y la fecha que se puso en la app de Internos. Tocá un nombre para ver todas sus notas.</div>' : ''}
   ${fil.map(p => { const ns = notas().filter(r => !r.sistema && quienDe(r)===p.id), u = ns.find(r => tipoDe(r)==='urgente' && inRange(r.fecha, weekRange(0))), ult = ns[0];
-    return `<button class="f" onclick="fichaDe('${esc(p.id)}')"><span class="ini">${esc(initials(p.nombre))}</span><span class="x"><b>${esc(p.nombre)}</b><small>${V.egr ? esc(p.estado) + (p.baja ? ' · ' + fDate(p.baja) : '') : ult ? relDay(ult.fecha) + ': ' + esc(ult.texto) : 'Sin notas todavía'}</small></span>${u ? '<span class="pu" title="Urgente esta semana"></span>' : ''}<span class="cnt"><b>${ns.length}</b><br>notas</span></button>`; }).join('') || '<div class="vacio">No hay nadie.</div>'}
+    return `<button class="f" onclick="fichaDe('${esc(p.id)}')"><span class="ini">${esc(initials(p.nombre))}</span><span class="x"><b>${esc(p.nombre)}</b><small>${V.egr ? '🗄️ ' + esc(p.estado) + (p.baja ? ' · egresó el ' + fDateY(p.baja) : '') : ult ? relDay(ult.fecha) + ': ' + esc(ult.texto) : 'Sin notas todavía'}</small></span>${u ? '<span class="pu" title="Urgente esta semana"></span>' : ''}<span class="cnt"><b>${ns.length}</b><br>notas</span></button>`; }).join('') || '<div class="vacio">No hay nadie.</div>'}
   <button class="b s" style="margin-top:8px" onclick="V.egr=!V.egr;V.q='';render();scrollTo(0,0)">${V.egr ? '‹ Volver a los activos' : '🗄️ Ver archivo de egresados (' + bajas().length + ')'}</button>`;
 }
 // Tocás un nombre: se abre el panel con su nombre arriba para escribir; abajo, todo su historial
 function fichaDe(id){ const p = BYID[id];
-  if(p.estado!=='Activo'){ $('sheet').innerHTML = `<div class="shh"><h2>${esc(p.nombre)}<small>${esc(p.estado)}${p.baja ? ' · ' + fDate(p.baja) : ''} · solo consulta</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>${historial(id)}`; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; return; }
+  if(p.estado!=='Activo'){ $('sheet').innerHTML = `<div class="shh"><h2>${esc(p.nombre)}<small>Archivo de egresados · solo consulta</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
+    <div class="egr"><div><span>Motivo</span><b>${esc(p.estado)}</b></div><div><span>Egresó</span><b>${p.baja ? fDateY(p.baja) : '—'}</b></div><div><span>Ingresó</span><b>${p.ingreso ? fDateY(p.ingreso) : '—'}</b></div>${p.ingreso && p.baja ? `<div><span>Estuvo</span><b>${durTxt(p.ingreso, p.baja)}</b></div>` : ''}${p.nota ? `<div style="grid-column:1/-1"><span>Nota del egreso</span><b>${esc(p.nota)}</b></div>` : ''}</div>${historial(id)}`; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; return; }
   anotar(id); }
 function historial(id){ const ns = notas().filter(r => quienDe(r)===id), fam = ns.filter(r => tipoDe(r)==='familiar').length;
   return `<div class="hist"><div class="grp">Historial · ${ns.length} nota${ns.length===1?'':'s'} · ${fam} 📞 familia</div>${porDia(ns, false) || '<div class="vacio">Todavía no hay nada anotado.</div>'}</div>`; }
