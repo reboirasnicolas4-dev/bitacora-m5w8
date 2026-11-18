@@ -144,6 +144,14 @@ a.b{display:block}
 .avisos b{display:block;font-size:15.5px;color:var(--acc)}.avisos span{display:block;color:#f3d9a8;font-size:13.5px;margin-top:3px}.avisos .btns{margin-top:10px}
 .egr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}.egr div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 10px}.egr span{display:block;font-size:11.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:700}.egr b{font-size:15px}
 .tipos.t3{grid-template-columns:repeat(3,1fr)}.tipos.t3 .tp{flex-direction:column;align-items:center;gap:3px;padding:12px 4px;text-align:center}.tipos.t3 .tp span{font-size:20px}
+.badge.n{background:var(--acc);color:var(--accx)}
+.nueva{display:flex;gap:8px;margin-bottom:6px}.nueva input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink);outline:none;font-size:15.5px}.nueva input:focus{border-color:var(--acc)}.nueva .b{width:auto;padding:12px 16px}
+.tarea{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:7px}
+.tarea.hecha{opacity:.45;background:transparent}.tarea.hecha b{text-decoration:line-through}
+.chk{position:relative;flex:none;width:30px;height:30px}.chk input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chk span{display:block;width:30px;height:30px;border-radius:9px;border:2px solid var(--mut);background:var(--card2)}
+.chk input:checked+span{background:var(--int);border-color:var(--int)}.chk input:checked+span::after{content:'✓';display:grid;place-items:center;height:100%;color:#10210f;font-weight:800;font-size:18px}
+.tt{flex:1;min-width:0;background:none;border:0;text-align:left;color:var(--ink);padding:0}.tt b{display:block;font-size:15.5px;font-weight:600}.tt small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -180,6 +188,7 @@ a.b{display:block}
   <button data-v="muro" class="on" onclick="go('muro')"><i>📝</i>Bitácora</button>
   <button data-v="viernes" onclick="go('viernes')"><i>🗓️</i>Viernes</button>
   <button data-v="internos" onclick="go('internos')"><i>👥</i>Internos</button>
+  <button data-v="tareas" onclick="go('tareas')"><i>✅</i>Tareas</button>
 </nav>
 <div class="sheet-wrap" id="sheetWrap" hidden><div class="backdrop" onclick="closeSheet()"></div><div class="sh" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast"></div>
@@ -300,7 +309,7 @@ function armar(int, egr, reg, tar, med){
       lugar:String(t.lugar||''), esp:String(t.especialidad||''), estado:String(t.estado||'pendiente') };
   }).sort((a,b) => a.fecha - b.fecha);
   TAR = RAW.tar.filter(o => o.id && String(o.titulo||'').trim()).map(o => ({ id:String(o.id), titulo:String(o.titulo), estado: TSTATE[o.estado] ? o.estado : 'pendiente',
-    resp:String(o.responsable||''), limite:toISO(o.limite), origen:String(o.origen||''), creada:String(o.creada||''), creadapor:String(o.creadapor||''), _fila:o._fila }));
+    resp:String(o.responsable||''), limite:toISO(o.limite), origen:String(o.origen||''), creada:String(o.creada||''), creadapor:String(o.creadapor||''), hecha:String(o.hecha||''), anulado:String(o.anulado||''), _fila:o._fila }));
 
   const nombres = new Set([miNombre()]);
   REGS.forEach(r => { if(r.personal) nombres.add(r.personal); if(r.operador && !r.sistema) nombres.add(r.operador); });
@@ -462,7 +471,7 @@ async function borrarFila(hoja, id, log){
 const TIPOS = {urgente:{l:'Urgente',i:'⚠',c:'var(--urg)'}, familiar:{l:'Familiar',i:'📞',c:'var(--fam)'}, interno:{l:'Interno',i:'🙂',c:'var(--int)'}, comunidad:{l:'Comunidad',i:'🏠',c:'var(--com)'}};
 const V = { v:'muro', filtro:'todo', q:'', egr:false, semana:0, f:null };
 
-function go(v){ V.v = v; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v===v)); $('fab').hidden = false; render(); scrollTo(0,0); }
+function go(v){ V.v = v; document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v===v)); $('fab').hidden = v==='tareas'; render(); scrollTo(0,0); if(v==='tareas') refrescarTareas(); }
 function mostrar(app){ $('login').hidden = app; $('app').hidden = !app; $('nav').hidden = !app; $('fab').hidden = !app; }
 function estado(t, err){ const e = $('estado'); e.textContent = t || ''; e.classList.toggle('err', !!err); e.hidden = !t; }
 
@@ -481,7 +490,9 @@ const fh = fTime;
 
 function render(){
   if($('app').hidden) return;
-  $('main').innerHTML = {muro:vMuro, viernes:vViernes, internos:vInternos}[V.v]();
+  $('main').innerHTML = {muro:vMuro, viernes:vViernes, internos:vInternos, tareas:vTareas}[V.v]();
+  const nt = document.querySelector('#nav [data-v=tareas]'); nt.querySelector('.badge')?.remove();
+  const pend = TAR.filter(t => !t.anulado && t.estado!=='hecho').length; if(pend) nt.insertAdjacentHTML('beforeend', `<span class="badge n">${pend}</span>`);
   const nb = document.querySelector('#nav [data-v=viernes]'); nb.querySelector('.badge')?.remove();
   const u = notas().filter(r => tipoDe(r)==='urgente' && !deEgresado(r) && inRange(r.fecha, weekRange(0))).length;
   if(u) nb.insertAdjacentHTML('beforeend', `<span class="badge">${u}</span>`);
@@ -681,6 +692,52 @@ function noAhora(){ try { localStorage.setItem('bit-aviso-no', String(Date.now()
 function cartelAvisos(){ let no = 0; try { no = Number(localStorage.getItem('bit-aviso-no') || 0); } catch(e){}
   if(avisosOn() || Date.now() - no < 7*DAY) return '';
   return `<div class="avisos"><b>🔔 Enterate al instante de lo urgente</b><span>Activá los avisos y te llega una notificación cada vez que alguien anota algo urgente.</span><div class="btns"><button class="b s" onclick="noAhora()">Ahora no</button><button class="b p" onclick="activarAvisos()">Activar avisos</button></div></div>`; }
+
+/* ======== 4) TAREAS DE LA COMUNIDAD: anotar cosas para hacer y tildarlas cuando están hechas ======== */
+function vTareas(){
+  const vivas = TAR.filter(t => !t.anulado), cre = t => t.creada || '';
+  const pend = vivas.filter(t => t.estado!=='hecho').sort((a,b) => cre(a).localeCompare(cre(b)));          // la más vieja primero
+  const hechas = vivas.filter(t => t.estado==='hecho').sort((a,b) => (b.hecha||'').localeCompare(a.hecha||''));   // la última hecha arriba de las hechas
+  const quienCuando = s => { const m = String(s||'').match(/^(\d{4}-\d{2}-\d{2}(?: \d{1,2}:\d{2})?)(?: por (.+))?$/); return m ? fDate(fechaDe(m[1])) + (m[2] ? ' · ' + esc(m[2]) : '') : esc(s); };
+  const fila = t => `<div class="tarea${t.estado==='hecho'?' hecha':''}">
+    <label class="chk"><input type="checkbox" ${t.estado==='hecho'?'checked':''} onchange="marcarTarea('${esc(t.id)}', this.checked)"><span></span></label>
+    <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}</small></button></div>`;
+  return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecho, tocá el cuadradito y baja al final.</div>
+  <div class="nueva"><input id="tNueva" placeholder="Nueva tarea… (ej: arreglar la canilla del baño)" onkeydown="if(event.key==='Enter')agregarTarea()"><button class="b p" onclick="agregarTarea()">Agregar</button></div>
+  <div class="grp">Para hacer (${pend.length})</div>
+  ${pend.map(fila).join('') || '<div class="vacio">No hay nada pendiente 👍</div>'}
+  ${hechas.length ? `<div class="grp">Hechas (${hechas.length})</div>${hechas.map(fila).join('')}` : ''}`;
+}
+async function agregarTarea(){
+  const inp = $('tNueva'), t = inp.value.trim(); if(!t){ inp.focus(); return; }
+  const rec = {id:nid('t'), titulo:t, estado:'pendiente', responsable:'', limite:'', origen:'Comunidad', creada:aHoja(new Date()), creadapor:miNombre(), hecha:''};
+  inp.disabled = true;
+  try { await guardarFila(HOJA_TAR, rec, 'Nueva tarea de la comunidad: ' + t.slice(0,80), false); RAW.tar.push(rec); armar(); guardarCache(); toast('✓ Tarea agregada'); }
+  catch(e){ inp.disabled = false; estado(errorGuardar(e), true); }
+}
+async function marcarTarea(id, hecho){
+  const t = TAR.find(x => x.id===id); if(!t) return;
+  const rec = {id, estado: hecho ? 'hecho' : 'pendiente', hecha: hecho ? aHoja(new Date()) + ' por ' + miNombre() : ''};
+  try { await guardarFila(HOJA_TAR, rec, (hecho ? 'Tarea hecha: ' : 'Tarea vuelve a pendiente: ') + t.titulo.slice(0,80), true);
+    Object.assign(RAW.tar.find(x => String(x.id)===id) || {}, rec); armar(); guardarCache(); toast(hecho ? '✓ Hecha' : 'Vuelve a pendientes'); }
+  catch(e){ render(); estado(errorGuardar(e), true); }
+}
+function verTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
+  $('sheet').innerHTML = `<div class="shh"><h2>Tarea<small>Anotó ${esc(t.creadapor || '—')}${t.creada ? ' · ' + fDate(fechaDe(t.creada)) + ' ' + fh(fechaDe(t.creada)) : ''}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
+    <div class="texto">${esc(t.titulo)}</div>
+    ${t.estado==='hecho' ? `<p class="nota">✓ Hecha: ${esc(t.hecha)}</p>` : ''}
+    <p class="err" id="tErr"></p><div id="tX"></div>
+    <div class="btns"><button class="b red" onclick="confirmarAnularTarea('${esc(t.id)}')">Anular</button><button class="b" onclick="closeSheet()">Cerrar</button></div>`;
+  $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
+function confirmarAnularTarea(id){ $('tX').innerHTML = `<div class="confirmar">¿Anular esta tarea? Queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('tX').innerHTML=''">No</button><button class="b red" onclick="anularTarea('${esc(id)}')">Sí, anular</button></div></div>`; }
+async function anularTarea(id){ const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
+  try { await guardarFila(HOJA_TAR, rec, 'Anuló una tarea de la comunidad', true); Object.assign(RAW.tar.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('Tarea anulada'); }
+  catch(e){ $('tErr').textContent = errorGuardar(e); $('tErr').style.display = 'block'; } }
+// Mientras estás en Tareas, se trae lo que marcan los compañeros cada 15 segundos
+async function refrescarTareas(){ if(!token || S.ocupado) return;
+  try { const r = await api({action:'getSheet', sheet:HOJA_TAR}); if(r && Array.isArray(r.data)){ const antes = JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]));
+    RAW.tar = r.data; if(antes !== JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]))){ armar(); guardarCache(); } } } catch(e){} }
+setInterval(() => { if(V.v==='tareas' && document.visibilityState==='visible' && $('sheetWrap').hidden) refrescarTareas(); }, 15000);
 
 /* ======== menú del usuario ======== */
 let instalar = null;
