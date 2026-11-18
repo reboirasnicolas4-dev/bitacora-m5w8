@@ -157,6 +157,9 @@ body.confab .app{padding-bottom:190px}
 .fi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:7px 2px 6px;font:600 11.5px "Hanken Grotesk",sans-serif;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fi span{font-size:17px;line-height:1.1}
 .fi.on{background:var(--acc);border-color:var(--acc);color:var(--accx)}
+.fab{left:auto;right:max(16px,calc((100vw - 560px)/2 + 16px));transform:none;width:auto;bottom:82px;padding:13px 20px 13px 16px;border-radius:99px;font:700 15.5px "Hanken Grotesk",sans-serif;display:flex;align-items:center;gap:6px;box-shadow:0 6px 18px #000b}
+.fab b{font-size:22px;line-height:1;font-weight:700}
+body.confab .app{padding-bottom:150px}
 </style>
 </head>
 <body>
@@ -188,7 +191,7 @@ body.confab .app{padding-bottom:190px}
   <div class="estado" id="estado" role="status" hidden></div>
   <div id="main"></div>
 </div>
-<button class="fab" id="fab" hidden onclick="anotar()">＋ Anotar novedad</button>
+<button class="fab" id="fab" hidden onclick="anotar()" aria-label="Anotar novedad"><b>＋</b>Anotar</button>
 <nav class="nav" id="nav" hidden>
   <button data-v="muro" class="on" onclick="go('muro')"><i>📝</i>Bitácora</button>
   <button data-v="viernes" onclick="go('viernes')"><i>🗓️</i>Viernes</button>
@@ -518,10 +521,10 @@ function vMuro(){
   // Lo urgente de la semana de guardia va siempre arriba de todo; el resto, en orden
   const wk = weekRange(0), arriba = V.filtro==='todo' ? L.filter(r => tipoDe(r)==='urgente' && inRange(r.fecha, wk)) : [];
   L = L.filter(r => !arriba.includes(r)); const tot = L.length; L = L.slice(0, 120);
-  return `${cartelAvisos()}<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar novedad</b> para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
+  return `${cartelAvisos()}<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar</b> (abajo a la derecha) para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
   <div class="filtros">${[['todo','📋','Todo'], ...Object.entries(TIPOS).map(([k,t]) => [k, t.i, t.l])].map(([k,i,l]) => `<button class="fi${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()"><span>${i}</span>${l}</button>`).join('')}</div>
   ${arriba.length ? `<div class="grp u">⚠ Urgente esta semana (${arriba.length})</div>${arriba.map(r => tarjeta(r, true, true)).join('')}<div class="grp">Todas las novedades</div>` : ''}
-  ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar novedad</b>.' : ' de este tipo.') + '</div>')}
+  ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar</b>.' : ' de este tipo.') + '</div>')}
   ${tot > 120 ? '<p class="nota">Se muestran las 120 más nuevas. Lo de antes está en el historial de cada interno.</p>' : ''}`;
 }
 
