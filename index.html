@@ -162,6 +162,13 @@ body.confab .app{padding-bottom:190px}
 body.confab .app{padding-bottom:150px}
 .quien.q2{grid-template-columns:1fr 1fr}
 .filtros.f4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.busca{display:flex;gap:8px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.busca:focus-within{border-color:var(--acc)}.busca input{flex:1;min-width:0;background:none;border:0;outline:none;padding:12px 0;color:var(--ink);font-size:16px}
+.bres{margin-top:6px;display:grid;gap:5px}.bres .nota{margin:4px 2px}
+.res1{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;color:var(--ink);font-size:15.5px;font-weight:600}
+.res1:active{border-color:var(--acc);background:var(--soft)}
+.elegido{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--acc);border-radius:12px;padding:9px 10px 9px 12px}
+.elegido b{flex:1;font-size:16px}.elegido button{background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:7px 12px;font-weight:600;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -543,7 +550,8 @@ function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = ope
   if(f.tipo && !tps.includes(f.tipo)) f.tipo = '';
   $('sheet').innerHTML = `<div class="shh"><h2>${fijo ? esc(fijo.nombre) + '<small>Anotar novedad</small>' : 'Anotar novedad<small>' + fDate(new Date()) + ' · ' + fh(new Date()) + ' · ' + esc(miNombre()) + '</small>'}</h2><button class="xx" onclick="closeSheet()" aria-label="Cerrar">✕</button></div>
   ${fijo ? '' : `<div class="paso"><i>1</i>¿De quién?</div>
-  <div class="lista">${activos().map(p => `<button class="nm${f.quien===p.id?' on':''}" onclick="V.f.quien='${esc(p.id)}';pintarForm()">${esc(p.nombre)}</button>`).join('') || '<span class="nota">No hay internos activos.</span>'}</div>`}
+  ${BYID[f.quien] ? `<div class="elegido"><span>👤</span><b>${esc(BYID[f.quien].nombre)}</b><button onclick="V.f.quien='';pintarForm();setTimeout(()=>$('bq')?.focus(),60)">Cambiar</button></div>`
+   : `<div class="busca"><span>🔍</span><input id="bq" placeholder="Escribí el nombre… (ej: pa)" autocomplete="off" autocapitalize="words" oninput="buscarInt(this.value)"></div><div id="bres" class="bres"><p class="nota">Empezá a escribir y aparecen los internos.</p></div>`}`}
   <div class="paso"><i>${fijo?1:2}</i>Tipo</div>
   <div class="tipos${tps.length===3?' t3':''}">${tps.map(k => [k, TIPOS[k]]).map(([k,t]) => `<button class="tp${f.tipo===k?' on':''}" style="--c:${t.c}" onclick="V.f.tipo='${k}';pintarForm()"><span>${t.i}</span>${t.l}</button>`).join('')}</div>
   <div class="paso"><i>${fijo?2:3}</i>¿Qué pasó?</div>
@@ -553,6 +561,12 @@ function pintarForm(){ const f = V.f, fijo = f.ficha && BYID[f.quien], ops = ope
   ${fijo ? historial(fijo.id) : ''}`;
   chk();
 }
+// Buscador: muestra los internos cuyo nombre o apellido empieza con lo que escribís (sin importar tildes ni mayúsculas)
+const sinTilde = x => String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+function buscarInt(q){ const box = $('bres'); if(!box) return; q = sinTilde(q);
+  if(!q){ box.innerHTML = '<p class="nota">Empezá a escribir y aparecen los internos.</p>'; return; }
+  const L = activos().filter(p => { const n = sinTilde(p.nombre); return n.startsWith(q) || n.split(/\s+/).some(w => w.startsWith(q)); });
+  box.innerHTML = L.slice(0, 8).map(p => `<button class="res1" onclick="V.f.quien='${esc(p.id)}';pintarForm()"><span>👤</span>${esc(p.nombre)}</button>`).join('') || '<p class="nota">No hay ningún interno con ese nombre.</p>'; }
 function modo(m){ V.f.modo = m; V.f.quien = ''; V.f.tipo = m==='op' ? 'equipo' : ''; pintarForm(); }
 function chk(){ const f = V.f, b = $('gu'); if(!b) return; const ok = f.quien && f.tipo && f.txt.trim(); b.disabled = !ok;
   b.textContent = !f.quien ? 'Elegí de quién' : !f.tipo ? 'Elegí el tipo' : !f.txt.trim() ? 'Escribí qué pasó' : 'Guardar'; }
