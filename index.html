@@ -185,6 +185,9 @@ body.confab .app{padding-bottom:150px}
 .tarea.anulando.fuera{opacity:.35;transform:translateX(30px)}
 .toast.conbtn{white-space:nowrap;padding:8px 8px 8px 16px}
 .anular-conf .b.red{background:#c0392b;border-color:#c0392b;color:#fff}.anular-conf .b.red:disabled{opacity:.8}
+.tarea .hecho{background:transparent;border:1.5px solid var(--line);color:var(--ink);display:flex;align-items:center;gap:7px;padding:9px 12px;font-weight:600;font-size:13.5px;white-space:nowrap}
+.tarea .hecho i{width:16px;height:16px;border:2px solid var(--mut);border-radius:50%;flex:none}
+.tarea .hecho:active{background:#16261a;border-color:#2f6b3d;color:var(--int)}.tarea .hecho:active i{border-color:var(--int);background:var(--int)}
 </style>
 </head>
 <body>
@@ -762,8 +765,8 @@ function vTareas(){
     if(an) return `<div class="tarea anulando${an==='anulada'?' fuera':''}"><div class="tt"><b>${esc(t.titulo)}</b><small>${an==='anulada' ? '🗑 Anulada' : '<span class="gira"></span> Anulando…'}</small></div></div>`;
     return `<div class="tarea${t.estado==='hecho'?' hecha':''}">
     <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}${t._pend ? ' · <span class="pend">⏳ guardando…</span>' : ''}</small></button>
-    ${t.estado==='hecho' ? `<button class="deshacer"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`; };
-  return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecha, tocá <b>✓ Hecha</b> y baja al final.</div>
+    ${t.estado==='hecho' ? `<button class="deshacer"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', true)"><i></i>Marcar hecha</button>`}</div>`; };
+  return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecha, tocá <b>Marcar hecha</b> y baja al final.</div>
   <div class="nueva"><input id="tNueva" placeholder="Nueva tarea… (ej: arreglar la canilla del baño)" onkeydown="if(event.key==='Enter')agregarTarea()"><button class="b p" onclick="agregarTarea()">Agregar</button></div>
   <div class="grp">Para hacer (${pend.length})</div>
   ${pend.map(fila).join('') || '<div class="vacio">No hay nada pendiente 👍</div>'}
