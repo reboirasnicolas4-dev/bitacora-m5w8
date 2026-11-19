@@ -236,7 +236,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER = "20261119170309";
+const APP_VER = "20261119202412";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -869,8 +869,19 @@ setInterval(() => { if(V.v==='tareas' && document.visibilityState==='visible' &&
 
 /* ======== menú del usuario ======== */
 let instalar = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalar = e; });
-window.addEventListener('appinstalled', () => { instalar = null; toast('Bitácora instalada'); });
+// Marca en el celular si Bitácora está instalada (la pantalla de Inicio de Internos lo lee para mostrar o no "Instalar")
+function marcaBit(v){ try { if(v) localStorage.setItem('bit_inst','"1"'); else localStorage.removeItem('bit_inst'); } catch(e){} }
+if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone) marcaBit(true);
+const pideInstalar = /[?&]instalar=1/.test(location.search);
+function barraInstalar(){ if(!instalar || document.getElementById('bitInstBar')) return;
+  const d = document.createElement('div'); d.id = 'bitInstBar';
+  d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);z-index:9999;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#3a2410,#211b15);border:1px solid #f7a823;border-radius:16px;padding:10px 12px;color:#f0e8da;font:400 14px system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4)';
+  d.innerHTML = '<div style="flex:1"><b style="display:block;font-size:15px">Instalá Bitácora en este celular</b>Queda con su ícono, como WhatsApp.</div><button type="button" style="border:0;background:#f7a823;color:#281a08;font:700 14px system-ui,sans-serif;height:42px;padding:0 14px;border-radius:11px;cursor:pointer">Instalar</button><button type="button" aria-label="Cerrar" style="border:0;background:none;color:#b3a99b;font-size:20px;cursor:pointer;width:32px;height:42px">✕</button>';
+  d.children[1].onclick = async () => { const ev = instalar; if(!ev) return; ev.prompt(); try { await ev.userChoice; } catch(e){} instalar = null; d.remove(); };
+  d.children[2].onclick = () => d.remove();
+  document.body.appendChild(d); }
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); instalar = e; marcaBit(false); if(pideInstalar) barraInstalar(); });
+window.addEventListener('appinstalled', () => { instalar = null; marcaBit(true); const b = document.getElementById('bitInstBar'); if(b) b.remove(); toast('Bitácora instalada'); });
 function abrirMenu(){
   $('sheet').innerHTML = `<div class="shh"><h2>Tu usuario<small>${esc(email)}${role ? ' · ' + esc(role) : ''}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
     <div class="paso">Tu nombre en las notas</div>
