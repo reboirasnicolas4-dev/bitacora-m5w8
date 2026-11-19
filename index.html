@@ -174,6 +174,8 @@ body.confab .app{padding-bottom:150px}
 .tarea .hecho:active{background:var(--int);color:#10210f}
 .tarea .deshacer{flex:none;background:none;border:1px solid var(--line);color:var(--mut);border-radius:12px;padding:8px 10px;font-weight:600;font-size:12.5px}
 .tarea.hecha{opacity:1}.tarea.hecha .tt{opacity:.45}
+
+.tarea .hecho:disabled,.tarea .deshacer:disabled{opacity:.5}
 </style>
 </head>
 <body>
@@ -410,8 +412,8 @@ async function refrescarBitacora(silencioso=true){
   if(!token || S.ocupado) return;
   try { const [bit, tar] = await Promise.all([api({action:'getSheet', sheet:HOJA_BIT}), api({action:'getSheet', sheet:HOJA_TAR})]);
     const antes = RAW.reg.length + '|' + RAW.tar.map(t=>t.estado).join();
-    if(document.querySelector('#sheetWrap:not([hidden])')) { RAW.reg = datos(bit); RAW.tar = datos(tar); return; } // no interrumpir un formulario abierto
-    armar(null, null, datos(bit), datos(tar)); guardarCache();
+    if(document.querySelector('#sheetWrap:not([hidden])')) { RAW.reg = datos(bit); ponerTareas(datos(tar)); return; } // no interrumpir un formulario abierto
+    ponerTareas(datos(tar)); armar(null, null, datos(bit), null); guardarCache();
     if(!silencioso && antes !== RAW.reg.length + '|' + RAW.tar.map(t=>t.estado).join()) toast('Hay novedades nuevas del equipo');
   } catch(e){ if(!silencioso) estado('No se pudo actualizar ('+e.message+').', true); }
 }
@@ -461,15 +463,23 @@ function mezclarBitacora(filas){
     toast(u ? '⚠ Urgente: ' + (u.nombres || u.personal || 'Comunidad') + ' · ' + (u.operador||'') : '🆕 Nueva novedad de ' + (ajenas[ajenas.length-1].operador || 'un compañero'));
     if(u && navigator.vibrate) try { navigator.vibrate([200,100,200]); } catch(e){} }
 }
-// Tareas en tiempo real: la lista de la planilla manda, y se conservan las que este celular todavía está guardando
-function mezclarTareas(filas){
+// Tareas: lo que este celular acaba de tocar manda sobre lo que llega de la planilla,
+// hasta que la planilla lo confirme (así nada "vuelve para atrás" ni desaparece un rato)
+const TAR_LOCAL = new Map(), TAR_NUEVAS = new Map();
+function tarLocal(id, campos){ id = String(id); const v = TAR_LOCAL.get(id) || {c:{}}; Object.assign(v.c, campos); v.t = Date.now(); TAR_LOCAL.set(id, v); aplicarTarLocal(); }
+function aplicarTarLocal(){ const ahora = Date.now();
+  TAR_LOCAL.forEach((v, id) => { const r = RAW.tar.find(x => String(x.id)===id); if(!r) return;
+    const listo = !v.c._pend && Object.keys(v.c).every(k => k.charAt(0)==='_' || String(r[k]||'')===String(v.c[k]||''));
+    if(listo || ahora - v.t > 90000) { TAR_LOCAL.delete(id); delete r._pend; return; }
+    Object.assign(r, v.c); }); }
+function ponerTareas(filas){
   if(!Array.isArray(filas)) return;
   const ids = new Set(filas.map(t => String(t.id)));
-  const antes = JSON.stringify(TAR.map(t => [t.id, t.estado, t.anulado]));
-  RAW.tar = filas.concat(RAW.tar.filter(t => t._pend && !ids.has(String(t.id))));
-  armar(); guardarCache();
-  if(antes !== JSON.stringify(TAR.map(t => [t.id, t.estado, t.anulado])) && typeof V!=='undefined' && V.v!=='tareas') {}
+  TAR_NUEVAS.forEach((v, id) => { if(ids.has(id) || Date.now() - v.t > 90000) TAR_NUEVAS.delete(id); });
+  RAW.tar = filas.map(f => Object.assign({}, f)).concat([...TAR_NUEVAS.values()].map(v => v.r));
+  aplicarTarLocal();
 }
+function mezclarTareas(filas){ ponerTareas(filas); armar(); guardarCache(); }
 function fsSalir(){ try { FSC.unsubs.forEach(u=>u()); } catch(x){} FSC.unsubs = []; FSC.ult = {}; FSC.datos = null;
   try { localStorage.removeItem('alas-fs-acc'); sessionStorage.removeItem('alas-fs-acc'); } catch(x){}
   try { const db = FSC.db; if(db){ db.terminate().then(()=>db.clearPersistence()).catch(()=>{}); } } catch(x){} FSC.db = null; FSC.listo = null; }
@@ -741,7 +751,7 @@ function vTareas(){
   const quienCuando = s => { const m = String(s||'').match(/^(\d{4}-\d{2}-\d{2}(?: \d{1,2}:\d{2})?)(?: por (.+))?$/); return m ? fDate(fechaDe(m[1])) + (m[2] ? ' · ' + esc(m[2]) : '') : esc(s); };
   const fila = t => `<div class="tarea${t.estado==='hecho'?' hecha':''}">
     <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}${t._pend ? ' · <span class="pend">⏳ guardando…</span>' : ''}</small></button>
-    ${t.estado==='hecho' ? `<button class="deshacer" onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho" onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`;
+    ${t.estado==='hecho' ? `<button class="deshacer"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`;
   return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecha, tocá <b>✓ Hecha</b> y baja al final.</div>
   <div class="nueva"><input id="tNueva" placeholder="Nueva tarea… (ej: arreglar la canilla del baño)" onkeydown="if(event.key==='Enter')agregarTarea()"><button class="b p" onclick="agregarTarea()">Agregar</button></div>
   <div class="grp">Para hacer (${pend.length})</div>
@@ -750,20 +760,28 @@ function vTareas(){
 }
 async function agregarTarea(){
   const inp = $('tNueva'), t = inp.value.trim(); if(!t){ inp.focus(); return; }
+  const kT = x => String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+  if(TAR.some(x => !x.anulado && x.estado!=='hecho' && kT(x.titulo)===kT(t))) { toast('Esa tarea ya está anotada'); inp.value=''; return; }
   const rec = {id:nid('t'), titulo:t, estado:'pendiente', responsable:'', limite:'', origen:'Comunidad', creada:aHoja(new Date()), creadapor:miNombre(), hecha:''};
   // aparece al instante; se guarda por detrás (así no se carga dos veces)
-  RAW.tar.push(Object.assign({}, rec, {_pend:true})); inp.value = ''; armar(); setTimeout(() => $('tNueva')?.focus(), 30);
+  const nueva = {r:Object.assign({}, rec, {_pend:true}), t:Date.now()}; TAR_NUEVAS.set(rec.id, nueva);
+  RAW.tar.push(nueva.r); inp.value = ''; armar();
   try { await guardarFila(HOJA_TAR, rec, 'Nueva tarea de la comunidad: ' + t.slice(0,80), false);
-    const x = RAW.tar.find(r => String(r.id)===rec.id); if(x) x._pend = false; armar(); guardarCache(); }
-  catch(e){ RAW.tar = RAW.tar.filter(r => String(r.id)!==rec.id); armar(); const i2 = $('tNueva'); if(i2) i2.value = t; estado(errorGuardar(e), true); }
+    nueva.r._pend = false; nueva.t = Date.now(); const x = RAW.tar.find(r => String(r.id)===rec.id); if(x) x._pend = false; armar(); guardarCache(); }
+  catch(e){ TAR_NUEVAS.delete(rec.id); RAW.tar = RAW.tar.filter(r => String(r.id)!==rec.id); armar(); const i2 = $('tNueva'); if(i2 && !i2.value) i2.value = t; estado(errorGuardar(e), true); }
 }
-async function marcarTarea(id, hecho){
-  const t = TAR.find(x => x.id===id); if(!t) return;
-  const rec = {id, estado: hecho ? 'hecho' : 'pendiente', hecha: hecho ? aHoja(new Date()) + ' por ' + miNombre() : ''};
-  const raw = RAW.tar.find(x => String(x.id)===id) || {}, antes = {estado: raw.estado, hecha: raw.hecha};
-  Object.assign(raw, rec); armar(); toast(hecho ? '✓ Hecha' : 'Vuelve a pendientes');          // se ve al instante
-  try { await guardarFila(HOJA_TAR, rec, (hecho ? 'Tarea hecha: ' : 'Tarea vuelve a pendiente: ') + t.titulo.slice(0,80), true); guardarCache(); }
-  catch(e){ Object.assign(raw, antes); armar(); estado(errorGuardar(e), true); }
+// Cambia una tarea al instante y la guarda por detrás; si falla, vuelve como estaba
+async function cambiarTarea(id, campos, log, aviso){
+  const raw = RAW.tar.find(x => String(x.id)===id); if(!raw || raw._pend) return;
+  const antes = {}; Object.keys(campos).forEach(k => antes[k] = raw[k]);
+  tarLocal(id, Object.assign({}, campos, {_pend:true})); armar(); if(aviso) toast(aviso);
+  try { await guardarFila(HOJA_TAR, Object.assign({id}, campos), log, true); tarLocal(id, {_pend:false}); armar(); guardarCache(); }
+  catch(e){ TAR_LOCAL.delete(id); const r = RAW.tar.find(x => String(x.id)===id); if(r){ Object.assign(r, antes); delete r._pend; } armar(); estado(errorGuardar(e), true); }
+}
+function marcarTarea(id, hecho){
+  const t = TAR.find(x => x.id===id); if(!t || t._pend) return;
+  cambiarTarea(id, {estado: hecho ? 'hecho' : 'pendiente', hecha: hecho ? aHoja(new Date()) + ' por ' + miNombre() : ''},
+    (hecho ? 'Tarea hecha: ' : 'Tarea vuelve a pendiente: ') + t.titulo.slice(0,80), hecho ? '✓ Hecha' : 'Vuelve a pendientes');
 }
 function verTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
   $('sheet').innerHTML = `<div class="shh"><h2>Tarea<small>Anotó ${esc(t.creadapor || '—')}${t.creada ? ' · ' + fDate(fechaDe(t.creada)) + ' ' + fh(fechaDe(t.creada)) : ''}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
@@ -773,13 +791,12 @@ function verTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
     <div class="btns"><button class="b red" onclick="confirmarAnularTarea('${esc(t.id)}')">Anular</button><button class="b" onclick="closeSheet()">Cerrar</button></div>`;
   $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
 function confirmarAnularTarea(id){ $('tX').innerHTML = `<div class="confirmar">¿Anular esta tarea? Queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('tX').innerHTML=''">No</button><button class="b red" onclick="anularTarea('${esc(id)}')">Sí, anular</button></div></div>`; }
-async function anularTarea(id){ const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
-  try { await guardarFila(HOJA_TAR, rec, 'Anuló una tarea de la comunidad', true); Object.assign(RAW.tar.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('Tarea anulada'); }
-  catch(e){ $('tErr').textContent = errorGuardar(e); $('tErr').style.display = 'block'; } }
+function anularTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return; closeSheet();
+  cambiarTarea(id, {anulado: aHoja(new Date()) + ' por ' + miNombre()}, 'Anuló una tarea de la comunidad: ' + t.titulo.slice(0,80), 'Tarea anulada'); }
 // Mientras estás en Tareas, se trae lo que marcan los compañeros cada 15 segundos
 async function refrescarTareas(){ if(!token || S.ocupado) return;
   try { const r = await api({action:'getSheet', sheet:HOJA_TAR}); if(r && Array.isArray(r.data)){ const antes = JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]));
-    RAW.tar = r.data; if(antes !== JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]))){ armar(); guardarCache(); } } } catch(e){} }
+    ponerTareas(r.data); if(antes !== JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]))){ armar(); guardarCache(); } } } catch(e){} }
 setInterval(() => { if(V.v==='tareas' && document.visibilityState==='visible' && $('sheetWrap').hidden) refrescarTareas(); }, 15000);
 
 /* ======== menú del usuario ======== */
