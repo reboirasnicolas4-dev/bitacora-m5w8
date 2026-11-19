@@ -233,6 +233,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
+const APP_VER = "20261118223906";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -426,13 +427,28 @@ async function refrescarBitacora(silencioso=true){
   if(!token || S.ocupado) return;
   try { const [bit, tar] = await Promise.all([api({action:'getSheet', sheet:HOJA_BIT}), api({action:'getSheet', sheet:HOJA_TAR})]);
     const antes = RAW.reg.length + '|' + RAW.tar.map(t=>t.estado).join();
-    if(document.querySelector('#sheetWrap:not([hidden])')) { RAW.reg = datos(bit); ponerTareas(datos(tar)); return; } // no interrumpir un formulario abierto
-    ponerTareas(datos(tar)); armar(null, null, datos(bit), null); guardarCache();
+    const nb = datos(bit), ids = new Set(nb.map(r => String(r.id))), conPend = nb.concat(RAW.reg.filter(r => r._pend && !ids.has(String(r.id))));
+    if(document.querySelector('#sheetWrap:not([hidden])')) { RAW.reg = conPend; ponerTareas(datos(tar)); return; } // no interrumpir un formulario abierto
+    ponerTareas(datos(tar)); armar(null, null, conPend, null); guardarCache();
     if(!silencioso && antes !== RAW.reg.length + '|' + RAW.tar.map(t=>t.estado).join()) toast('Hay novedades nuevas del equipo');
   } catch(e){ if(!silencioso) estado('No se pudo actualizar ('+e.message+').', true); }
 }
-setInterval(() => { if(document.visibilityState==='visible') refrescarBitacora(false); }, 60000);
-document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible' && token) refrescarBitacora(false); });
+setInterval(() => { if(document.visibilityState==='visible') refrescarBitacora(false); }, 30000);
+// Cuando se publica una versión nueva de la app, se pone sola (sin tener que deslizar para recargar)
+async function revisarVersion(){
+  if(typeof APP_VER==='undefined' || !location.protocol.startsWith('http')) return;
+  try { const v = (await fetch('version.txt?n=' + Date.now(), {cache:'no-store'}).then(r => r.ok ? r.text() : '')).trim();
+    if(!v || v===APP_VER) return;
+    if(!$('sheetWrap').hidden || S.ocupado || document.activeElement?.value){ revisarVersion.pend = true; return; }
+    const ya = sessionStorage.getItem('alas-recarga') || '';
+    if(ya===v + '|2') return;                                   // ya se intentó: no quedar recargando
+    sessionStorage.setItem('alas-recarga', v + (ya===v ? '|2' : ''));
+    toast('Actualizando la app…');
+    setTimeout(() => { if(ya===v) location.replace(location.pathname + '?v=' + encodeURIComponent(v)); else location.reload(); }, 700);
+  } catch(e){} }
+setInterval(() => { if(document.visibilityState==='visible') revisarVersion(); }, 60000);
+setTimeout(revisarVersion, 4000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible'){ revisarVersion(); if(token) refrescarBitacora(false); } });
 
 /* ============ Base en tiempo real (Firebase): altas y egresos de la app de Internos llegan solos ============ */
 const FB_CONF = {apiKey:"AIzaSyC3mDOcJqIa4HfMOCsCQod2tbi30zkmUUs",authDomain:"alas-de-libertad.firebaseapp.com",projectId:"alas-de-libertad",storageBucket:"alas-de-libertad.firebasestorage.app",messagingSenderId:"39658390390",appId:"1:39658390390:web:4cfb1fdc7a29b26b0eb057"};
@@ -857,7 +873,7 @@ async function instalarApp(){ if(!instalar) return; instalar.prompt(); try { awa
 function salir(){ closeSheet(); cerrarSesion(); email=''; role=''; RAW.int=[]; RAW.egr=[]; RAW.reg=[]; RAW.tar=[]; PERS=[]; REGS=[]; TAR=[]; $('lmsg').textContent=''; mostrar(false); modoSetup(false); }
 
 function openSheet(html){ $('sheet').innerHTML = html; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
-function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; if(rec){ try { rec.stop(); } catch(e){} } }
+function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; if(rec){ try { rec.stop(); } catch(e){} } if(revisarVersion.pend){ revisarVersion.pend = false; setTimeout(revisarVersion, 3000); } }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
 function toast(t, accion, fn){ const el = $('toast'); el.innerHTML = ''; const sp = document.createElement('span'); sp.textContent = t; el.append(sp); el.classList.toggle('conbtn', !!accion);
   if(accion){ const b = document.createElement('button'); b.textContent = accion; b.onclick = () => { el.classList.remove('show'); fn(); }; el.append(b); }
