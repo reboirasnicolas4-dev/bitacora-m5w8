@@ -176,6 +176,15 @@ body.confab .app{padding-bottom:150px}
 .tarea.hecha{opacity:1}.tarea.hecha .tt{opacity:.45}
 
 .tarea .hecho:disabled,.tarea .deshacer:disabled{opacity:.5}
+.toast.conbtn{pointer-events:auto;display:flex;align-items:center;gap:14px}.toast button{background:#1b140d;color:#f0e8da;border:0;border-radius:9px;padding:7px 12px;font-weight:700}
+.anular-conf{text-align:center;padding:6px 2px}.anular-conf .ic{font-size:40px;margin-bottom:4px}.anular-conf h2{margin:0 0 12px;font-size:20px}.anular-conf .texto{text-align:left}
+.anular-conf .btns .b{padding:15px 10px;font-size:16px}
+.b:active,.tt:active{transform:scale(.96)}.b{transition:transform .08s}
+.gira{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:gira .7s linear infinite;vertical-align:-2px}@keyframes gira{to{transform:rotate(360deg)}}
+.tarea.anulando{background:#2a1512;border-color:#6a2c20;transition:opacity .9s,transform .9s}.tarea.anulando b{text-decoration:line-through;color:#e9a99a}.tarea.anulando small{color:#ff9a85;font-weight:700}
+.tarea.anulando.fuera{opacity:.35;transform:translateX(30px)}
+.toast.conbtn{white-space:nowrap;padding:8px 8px 8px 16px}
+.anular-conf .b.red{background:#c0392b;border-color:#c0392b;color:#fff}.anular-conf .b.red:disabled{opacity:.8}
 </style>
 </head>
 <body>
@@ -745,13 +754,15 @@ function cartelAvisos(){ let no = 0; try { no = Number(localStorage.getItem('bit
 
 /* ======== 4) TAREAS DE LA COMUNIDAD: anotar cosas para hacer y tildarlas cuando están hechas ======== */
 function vTareas(){
-  const vivas = TAR.filter(t => !t.anulado), cre = t => t.creada || '';
+  const vivas = TAR.filter(t => !t.anulado || (typeof ANULANDO!=='undefined' && ANULANDO.has(t.id))), cre = t => t.creada || '';
   const pend = vivas.filter(t => t.estado!=='hecho').sort((a,b) => cre(a).localeCompare(cre(b)));          // la más vieja primero
   const hechas = vivas.filter(t => t.estado==='hecho').sort((a,b) => (b.hecha||'').localeCompare(a.hecha||''));   // la última hecha arriba de las hechas
   const quienCuando = s => { const m = String(s||'').match(/^(\d{4}-\d{2}-\d{2}(?: \d{1,2}:\d{2})?)(?: por (.+))?$/); return m ? fDate(fechaDe(m[1])) + (m[2] ? ' · ' + esc(m[2]) : '') : esc(s); };
-  const fila = t => `<div class="tarea${t.estado==='hecho'?' hecha':''}">
+  const fila = t => { const an = typeof ANULANDO!=='undefined' && ANULANDO.get(t.id);
+    if(an) return `<div class="tarea anulando${an==='anulada'?' fuera':''}"><div class="tt"><b>${esc(t.titulo)}</b><small>${an==='anulada' ? '🗑 Anulada' : '<span class="gira"></span> Anulando…'}</small></div></div>`;
+    return `<div class="tarea${t.estado==='hecho'?' hecha':''}">
     <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}${t._pend ? ' · <span class="pend">⏳ guardando…</span>' : ''}</small></button>
-    ${t.estado==='hecho' ? `<button class="deshacer"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`;
+    ${t.estado==='hecho' ? `<button class="deshacer"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho"${t._pend?' disabled':''} onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`; };
   return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecha, tocá <b>✓ Hecha</b> y baja al final.</div>
   <div class="nueva"><input id="tNueva" placeholder="Nueva tarea… (ej: arreglar la canilla del baño)" onkeydown="if(event.key==='Enter')agregarTarea()"><button class="b p" onclick="agregarTarea()">Agregar</button></div>
   <div class="grp">Para hacer (${pend.length})</div>
@@ -772,11 +783,11 @@ async function agregarTarea(){
 }
 // Cambia una tarea al instante y la guarda por detrás; si falla, vuelve como estaba
 async function cambiarTarea(id, campos, log, aviso){
-  const raw = RAW.tar.find(x => String(x.id)===id); if(!raw || raw._pend) return;
+  const raw = RAW.tar.find(x => String(x.id)===id); if(!raw || raw._pend) return false;
   const antes = {}; Object.keys(campos).forEach(k => antes[k] = raw[k]);
   tarLocal(id, Object.assign({}, campos, {_pend:true})); armar(); if(aviso) toast(aviso);
-  try { await guardarFila(HOJA_TAR, Object.assign({id}, campos), log, true); tarLocal(id, {_pend:false}); armar(); guardarCache(); }
-  catch(e){ TAR_LOCAL.delete(id); const r = RAW.tar.find(x => String(x.id)===id); if(r){ Object.assign(r, antes); delete r._pend; } armar(); estado(errorGuardar(e), true); }
+  try { await guardarFila(HOJA_TAR, Object.assign({id}, campos), log, true); tarLocal(id, {_pend:false}); armar(); guardarCache(); return true; }
+  catch(e){ TAR_LOCAL.delete(id); const r = RAW.tar.find(x => String(x.id)===id); if(r){ Object.assign(r, antes); delete r._pend; } armar(); toast('⚠ No se pudo guardar. Probá de nuevo'); estado(errorGuardar(e), true); return false; }
 }
 function marcarTarea(id, hecho){
   const t = TAR.find(x => x.id===id); if(!t || t._pend) return;
@@ -790,9 +801,21 @@ function verTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
     <p class="err" id="tErr"></p><div id="tX"></div>
     <div class="btns"><button class="b red" onclick="confirmarAnularTarea('${esc(t.id)}')">Anular</button><button class="b" onclick="closeSheet()">Cerrar</button></div>`;
   $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
-function confirmarAnularTarea(id){ $('tX').innerHTML = `<div class="confirmar">¿Anular esta tarea? Queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('tX').innerHTML=''">No</button><button class="b red" onclick="anularTarea('${esc(id)}')">Sí, anular</button></div></div>`; }
-function anularTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return; closeSheet();
-  cambiarTarea(id, {anulado: aHoja(new Date()) + ' por ' + miNombre()}, 'Anuló una tarea de la comunidad: ' + t.titulo.slice(0,80), 'Tarea anulada'); }
+function confirmarAnularTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
+  $('sheet').innerHTML = `<div class="anular-conf"><div class="ic">🗑</div><h2>¿Anular esta tarea?</h2>
+    <div class="texto">${esc(t.titulo)}</div><p class="nota">No se borra del todo: queda guardada en la planilla como anulada.</p>
+    <div class="btns"><button class="b" id="aNo" onclick="verTarea('${esc(id)}')">No, volver</button><button class="b red" id="aSi" onclick="anularTarea('${esc(id)}')">Sí, anular</button></div></div>`; }
+const ANULANDO = new Map();
+async function anularTarea(id){ const t = TAR.find(x => x.id===id); if(!t || ANULANDO.has(id)) return;
+  const si = $('aSi'), no = $('aNo'); if(si){ si.disabled = true; si.innerHTML = '<span class="gira"></span> Anulando…'; } if(no) no.disabled = true;
+  await new Promise(r => setTimeout(r, 450));            // que se vea que se apretó
+  ANULANDO.set(id, 'anulando'); closeSheet();
+  const ok = await cambiarTarea(id, {anulado: aHoja(new Date()) + ' por ' + miNombre()}, 'Anuló una tarea de la comunidad: ' + t.titulo.slice(0,80));
+  if(!ok){ ANULANDO.delete(id); armar(); return; }
+  ANULANDO.set(id, 'anulada'); armar();
+  toast('🗑 Tarea anulada', 'Deshacer', () => { ANULANDO.delete(id); cambiarTarea(id, {anulado:''}, 'Volvió a poner una tarea anulada: ' + t.titulo.slice(0,80), 'Tarea recuperada'); });
+  setTimeout(() => { ANULANDO.delete(id); armar(); }, 1800);
+}
 // Mientras estás en Tareas, se trae lo que marcan los compañeros cada 15 segundos
 async function refrescarTareas(){ if(!token || S.ocupado) return;
   try { const r = await api({action:'getSheet', sheet:HOJA_TAR}); if(r && Array.isArray(r.data)){ const antes = JSON.stringify(RAW.tar.map(t => [t.id,t.estado,t.anulado]));
@@ -823,7 +846,9 @@ function salir(){ closeSheet(); cerrarSesion(); email=''; role=''; RAW.int=[]; R
 function openSheet(html){ $('sheet').innerHTML = html; $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; }
 function closeSheet(){ $('sheetWrap').hidden = true; document.body.style.overflow = ''; if(rec){ try { rec.stop(); } catch(e){} } }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeSheet(); });
-function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(() => el.classList.remove('show'), 2400); }
+function toast(t, accion, fn){ const el = $('toast'); el.innerHTML = ''; const sp = document.createElement('span'); sp.textContent = t; el.append(sp); el.classList.toggle('conbtn', !!accion);
+  if(accion){ const b = document.createElement('button'); b.textContent = accion; b.onclick = () => { el.classList.remove('show'); fn(); }; el.append(b); }
+  el.classList.add('show'); clearTimeout(window._tt); window._tt = setTimeout(() => el.classList.remove('show'), accion ? 6000 : 2400); }
 /* ============ Ingreso (igual que Internos y Cuartos) ============ */
 function modoSetup(on, codigo){ $('setup').hidden = !on; $('pwrow').hidden = on; $('coderow').hidden = !(on && codigo); if(!on) $('ncode').value = '';
   $('ltxt').textContent = on ? (codigo ? 'Escribí el código que te pasaron y elegí tu contraseña nueva.' : 'Es tu primera vez: elegí una contraseña para tu usuario.') : 'Ingresá con el mismo correo y contraseña de la app de Internos.';
