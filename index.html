@@ -194,6 +194,7 @@ body.confab .app{padding-bottom:150px}
 .mov .ic{font-size:22px;flex:none}.mov .x{flex:1;min-width:0}.mov b{display:block;font-size:15px}.mov small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px;line-height:1.35}.mov .fl{color:var(--mut);font-size:20px}
 .mov.sale{border-left-color:#d9822b}.mov.entra{border-left-color:#4caf6a}.mov.aviso{border-left-color:#d9822b;background:#241a10}
 </style>
+<script src="https://reboirasnicolas4-dev.github.io/registro-k7x2/inicio.js?v=5" data-app="bitacora"></script>
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite"><div class="sp-in"><img src="logo.png" alt=""><b>Alas de Libertad</b><small>Cargando la bitácora…</small></div></div>
@@ -220,7 +221,7 @@ body.confab .app{padding-bottom:150px}
 </section>
 
 <div class="app" id="app" hidden>
-  <div class="top"><a data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/?inicio=1" aria-label="Volver al inicio" title="Volver al inicio" style="display:flex;flex:none"><img src="logo.png" alt=""></a><div style="flex:1"><h1>Bitácora</h1><small>Alas de Libertad</small></div><button class="me" id="meBtn" onclick="abrirMenu()" aria-label="Tu usuario"></button></div>
+  <div class="top"><a data-pasa href="https://reboirasnicolas4-dev.github.io/registro-k7x2/?inicio=1" onclick="if(window.AlasInicio){AlasInicio.abrir();return false}" aria-label="Volver al inicio" title="Volver al inicio" style="display:flex;flex:none"><img src="logo.png" alt=""></a><div style="flex:1"><h1>Bitácora</h1><small>Alas de Libertad</small></div><button class="me" id="meBtn" onclick="abrirMenu()" aria-label="Tu usuario"></button></div>
   <div class="estado" id="estado" role="status" hidden></div>
   <div id="main"></div>
 </div>
@@ -236,7 +237,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER = "20261119202911";
+const APP_VER = "20261119204637";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
