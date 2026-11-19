@@ -190,6 +190,9 @@ body.confab .app{padding-bottom:150px}
 .tarea .hecho:active{background:#16261a;border-color:#2f6b3d;color:var(--int)}.tarea .hecho:active i{border-color:var(--int);background:var(--int)}
 .anular-conf .b.verde{background:#2f8a46;border-color:#2f8a46;color:#fff}.anular-conf .b.verde:disabled{opacity:.85}
 .hecha-conf .texto{font-size:17px;font-weight:700;text-align:center;border:1px solid #2f6b3d;background:#16261a}
+.mov{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--mut);border-radius:14px;padding:10px 12px;margin-bottom:7px;color:var(--ink)}
+.mov .ic{font-size:22px;flex:none}.mov .x{flex:1;min-width:0}.mov b{display:block;font-size:15px}.mov small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px;line-height:1.35}.mov .fl{color:var(--mut);font-size:20px}
+.mov.sale{border-left-color:#d9822b}.mov.entra{border-left-color:#4caf6a}.mov.aviso{border-left-color:#d9822b;background:#241a10}
 </style>
 </head>
 <body>
@@ -233,7 +236,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER = "20261118223906";
+const APP_VER = "20261119170309";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -588,6 +591,7 @@ function vMuro(){
   L = L.filter(r => !arriba.includes(r)); const tot = L.length; L = L.slice(0, 120);
   return `${cartelAvisos()}<div class="ayuda">📝 Todo lo que pasa, en orden. Tocá <b>＋ Anotar</b> (abajo a la derecha) para sumar algo. Hoy van <b>${hoy}</b> novedad${hoy===1?'':'es'}.</div>
   <div class="filtros f4">${[['todo','📋','Todo'], ...FILTROS.map(k => [k, TIPOS[k].i, TIPOS[k].l])].map(([k,i,l]) => `<button class="fi${V.filtro===k?' on':''}" onclick="V.filtro='${k}';render()"><span>${i}</span>${l}</button>`).join('')}</div>
+  ${(() => { const W = semana0(); return W.bajas.length || W.ingresos.length ? `<button class="mov aviso" onclick="go('viernes')"><span class="ic">📌</span><span class="x"><b>Movimientos de esta semana</b><small>${[...W.bajas.map(p => '🚪 ' + esc(shortName(p.nombre)) + ' (' + esc(p.estado) + ')'), ...W.ingresos.map(p => '🆕 ' + esc(shortName(p.nombre)) + ' ingresó')].join(' · ')}</small></span><span class="fl">›</span></button>` : ''; })()}
   ${arriba.length ? `<div class="grp u">⚠ Urgente esta semana (${arriba.length})</div>${arriba.map(r => tarjeta(r, true, true)).join('')}<div class="grp">Todas las novedades</div>` : ''}
   ${porDia(L, true) || (arriba.length ? '' : '<div class="vacio">Todavía no hay novedades' + (V.filtro==='todo' ? '. Tocá <b>＋ Anotar</b>.' : ' de este tipo.') + '</div>')}
   ${tot > 120 ? '<p class="nota">Se muestran las 120 más nuevas. Lo de antes está en el historial de cada interno.</p>' : ''}`;
@@ -675,15 +679,17 @@ async function anular(id){ const rec = {id, anulado: aHoja(new Date()) + ' por '
   catch(e){ $('vErr').textContent = errorGuardar(e); $('vErr').style.display = 'block'; } }
 
 /* ======== 2) VIERNES: la semana de guardia (viernes a viernes) ======== */
+function semana0(){ const g = V.semana; V.semana = 0; try { return semana(); } finally { V.semana = g; } }
 function semana(){
   const rng = weekRange(V.semana), [s, e] = rng, L = notas().filter(r => !r.sistema && inRange(r.fecha, rng)).sort((a,b) => a.fecha - b.fecha);
   const urg = L.filter(r => tipoDe(r)==='urgente' && !deEgresado(r)), resto = L.filter(r => !urg.includes(r));
   const porInt = PERS.filter(p => resto.some(r => quienDe(r)===p.id)).sort(porIngreso).map(p => ({p, L: resto.filter(r => quienDe(r)===p.id)}));
   const com = resto.filter(r => quienDe(r)==='com'), ops = resto.filter(r => quienDe(r).startsWith('op:'));
   const sin = V.semana===0 ? activos().filter(p => !L.some(r => quienDe(r)===p.id)) : [];
-  const bajas = PERS.filter(p => p.baja && !p.fantasma && inRange(p.baja, rng));
+  const bajas = PERS.filter(p => p.baja && !p.fantasma && inRange(new Date(+p.baja + 12*36e5), rng)).sort((a,b) => a.baja - b.baja);
+  const ingresos = PERS.filter(p => p.ingreso && !p.fantasma && inRange(new Date(+p.ingreso + 12*36e5), rng)).sort((a,b) => a.ingreso - b.ingreso);
   const k = toISO(aHoja(s)), cerrada = reuniones().find(r => r.personal===k);
-  return {s, e, L, urg, porInt, com, ops, sin, bajas, k, cerrada};
+  return {s, e, L, urg, porInt, com, ops, sin, bajas, ingresos, k, cerrada};
 }
 function vViernes(){
   const W = semana(), enCurso = new Date() < W.e;
@@ -696,6 +702,7 @@ function vViernes(){
   <button class="b wa grande" onclick="copiar()">📋 Copiar resumen para WhatsApp</button>
   <div class="grp u">⚠ Urgente</div>
   ${W.urg.map(r => tarjeta(r, true, true)).join('') || '<div class="vacio">Nada urgente esta semana 👍</div>'}
+  ${movimientos(W)}
   <div class="grp">👤 Por interno</div>
   ${W.porInt.map(x => `<div class="bl"><b>${esc(x.p.nombre)}${x.p.estado!=='Activo' ? ' <span class="est">' + esc(x.p.estado) + '</span>' : ''}</b>${x.L.map(ln).join('')}</div>`).join('') || '<div class="vacio">Sin novedades de internos.</div>'}
   ${W.sin.length ? `<div class="ayuda">Sin nada anotado esta semana: <b>${W.sin.map(p => esc(p.nombre)).join(', ')}</b>.</div>` : ''}
@@ -705,10 +712,19 @@ function vViernes(){
   <div class="grp">🗄️ Reuniones anteriores</div>
   ${ant.map(r => `<button class="f" onclick="verReunion('${esc(r.id)}')"><span class="x"><b>${esc(r.nombres || 'Reunión')}</b><small>Cerrada el ${fDate(r.fecha)} ${fh(r.fecha)} por ${esc(r.operador)}</small></span><span class="fl">›</span></button>`).join('') || '<div class="vacio">Todavía no se cerró ninguna reunión.</div>'}`;
 }
+// Egresos e ingresos de la semana: se ponen solos desde la app de Internos (no hay que anotarlos)
+const movEgr = p => `Egresó el ${fDate(p.baja)} · ${p.estado}${p.nota ? ' · ' + p.nota : ''}${p.ingreso ? ' · estuvo ' + durTxt(p.ingreso, p.baja) : ''}`;
+const movIng = p => `Ingresó el ${fDate(p.ingreso)}${p.tipo ? ' · ' + p.tipo : ''}`;
+function movimientos(W){ if(!W.bajas.length && !W.ingresos.length) return '';
+  const it = (p, ic, cl, t) => `<button class="mov ${cl}" onclick="fichaDe('${esc(p.id)}')"><span class="ic">${ic}</span><span class="x"><b>${esc(p.nombre)}</b><small>${esc(t)}</small></span><span class="fl">›</span></button>`;
+  return `<div class="grp">📌 Movimientos de la semana</div><p class="nota" style="margin-top:-4px">Se anotan solos desde la app de Internos.</p>
+    ${W.bajas.map(p => it(p, '🚪', 'sale', movEgr(p))).join('')}${W.ingresos.map(p => it(p, '🆕', 'entra', movIng(p))).join('')}`; }
 function textoWA(){
   const W = semana(), q = r => { const k = quienDe(r); return k==='com' ? 'Comunidad' : k.startsWith('op:') ? k.slice(3) : shortName(BYID[k] ? BYID[k].nombre : '—'); };
   const L = ['*ALAS DE LIBERTAD · BITÁCORA*', `Semana del ${fDate(W.s)} al ${fDate(W.e)}`, '', '⚠ *URGENTE*'];
   W.urg.forEach(r => L.push(`• *${q(r)}* (${fDate(r.fecha)}): ${r.texto}`)); if(!W.urg.length) L.push('• Nada urgente.');
+  if(W.bajas.length){ L.push('', '🚪 *EGRESOS*'); W.bajas.forEach(p => L.push(`• *${shortName(p.nombre)}*: ${movEgr(p)}`)); }
+  if(W.ingresos.length){ L.push('', '🆕 *INGRESOS*'); W.ingresos.forEach(p => L.push(`• *${shortName(p.nombre)}*: ${movIng(p)}`)); }
   L.push('', '👤 *POR INTERNO*'); W.porInt.forEach(x => { L.push(`*${shortName(x.p.nombre)}*`); x.L.forEach(r => L.push(`– ${TIPOS[tipoDe(r)].i} ${fDate(r.fecha)}: ${r.texto}`)); }); if(!W.porInt.length) L.push('• Sin novedades.');
   if(W.com.length){ L.push('', '🏠 *GENERAL*'); W.com.forEach(r => L.push(`• ${fDate(r.fecha)}: ${r.texto}`)); }
   if(W.ops.length){ L.push('', '🧑‍💼 *EQUIPO*'); W.ops.forEach(r => L.push(`• ${r.personal} (${fDate(r.fecha)}): ${r.texto}`)); }
