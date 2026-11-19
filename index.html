@@ -169,6 +169,11 @@ body.confab .app{padding-bottom:150px}
 .res1:active{border-color:var(--acc);background:var(--soft)}
 .elegido{display:flex;align-items:center;gap:10px;background:var(--soft);border:1px solid var(--acc);border-radius:12px;padding:9px 10px 9px 12px}
 .elegido b{flex:1;font-size:16px}.elegido button{background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--ink);padding:7px 12px;font-weight:600;font-size:13.5px}
+.pend{color:var(--acc);font-weight:600}
+.tarea .hecho{flex:none;background:#16261a;border:1px solid #2f6b3d;color:var(--int);border-radius:12px;padding:10px 14px;font-weight:700;font-size:14px}
+.tarea .hecho:active{background:var(--int);color:#10210f}
+.tarea .deshacer{flex:none;background:none;border:1px solid var(--line);color:var(--mut);border-radius:12px;padding:8px 10px;font-weight:600;font-size:12.5px}
+.tarea.hecha{opacity:1}.tarea.hecha .tt{opacity:.45}
 </style>
 </head>
 <body>
@@ -308,7 +313,7 @@ function armar(int, egr, reg, tar, med){
     });
     return { id:String(o.id), fecha:fechaDe(o.fecha), cat: CATS[o.categoria] ? o.categoria : 'general', prio: PRIOS[o.prioridad] ? o.prioridad : 'normal',
       internos, nombres:noms, cedulas:ceds, personal:String(o.personal||''), texto:String(o.texto||''), operador:String(o.operador||''), email:String(o.email||''),
-      editado:String(o.editado||''), anulado:String(o.anulado||''), antes:String(o.antes||''), categoria:String(o.categoria||''), quienTipo:String(o.quien||''), _fila:o._fila };
+      editado:String(o.editado||''), anulado:String(o.anulado||''), antes:String(o.antes||''), categoria:String(o.categoria||''), quienTipo:String(o.quien||''), _pend:!!o._pend, _fila:o._fila };
   }).sort((a,b)=>b.fecha-a.fecha);
   // Bajas: una línea automática en la bitácora el día del egreso (no se guarda, se arma de la pestaña Egresados)
   bajas().filter(p=>!p.fantasma && p.baja).forEach(p => REGS.push({ id:'egr:'+p.id, fecha:new Date(p.baja.getFullYear(),p.baja.getMonth(),p.baja.getDate(),8,0), cat:'conducta', prio:'urgente',
@@ -326,7 +331,7 @@ function armar(int, egr, reg, tar, med){
       lugar:String(t.lugar||''), esp:String(t.especialidad||''), estado:String(t.estado||'pendiente') };
   }).sort((a,b) => a.fecha - b.fecha);
   TAR = RAW.tar.filter(o => o.id && String(o.titulo||'').trim()).map(o => ({ id:String(o.id), titulo:String(o.titulo), estado: TSTATE[o.estado] ? o.estado : 'pendiente',
-    resp:String(o.responsable||''), limite:toISO(o.limite), origen:String(o.origen||''), creada:String(o.creada||''), creadapor:String(o.creadapor||''), hecha:String(o.hecha||''), anulado:String(o.anulado||''), _fila:o._fila }));
+    resp:String(o.responsable||''), limite:toISO(o.limite), origen:String(o.origen||''), creada:String(o.creada||''), creadapor:String(o.creadapor||''), hecha:String(o.hecha||''), anulado:String(o.anulado||''), _pend:!!o._pend, _fila:o._fila }));
 
   const nombres = new Set([miNombre()]);
   REGS.forEach(r => { if(r.personal) nombres.add(r.personal); if(r.operador && !r.sistema) nombres.add(r.operador); });
@@ -431,11 +436,12 @@ async function fsAcceso(forzar){ const k = 'alas-fs-acc', marca = email+'|'+FSC.
 async function fsEscuchar(){
   if(!token || !FSC.datos || FSC.unsubs.length || fsEscuchar.p) return; fsEscuchar.p = 1;
   try { await fsIniciar(); await fsAcceso(false); } catch(e){ fsEscuchar.p = 0; return; }
-  ['internos', 'hoja_'+HOJA_EGR, 'hoja_'+HOJA_BIT].forEach(id => { let reintento = false;
+  ['internos', 'hoja_'+HOJA_EGR, 'hoja_'+HOJA_BIT, 'hoja_TareasBitacora'].forEach(id => { let reintento = false;
     const c = () => { const u = FSC.db.doc('datos/'+id).onSnapshot(s => { const o = s.data(); if(!o || !Array.isArray(o.d) || !token || !FSC.datos) return;
         const t = o.t && o.t.toMillis ? o.t.toMillis() : 0; if(t && t < FSC.tCarga) return;
         const j = JSON.stringify(o.d); if(FSC.ult[id]===j) return;
         if(id==='hoja_'+HOJA_BIT){ FSC.ult[id] = j; mezclarBitacora(o.d); return; }
+        if(id==='hoja_TareasBitacora'){ FSC.ult[id] = j; mezclarTareas(o.d); return; }
         const antes = activos().map(p=>p.id).join();
         FSC.ult[id] = j; FSC.datos[id] = o.d;
         armar(FSC.datos.internos, FSC.datos['hoja_'+HOJA_EGR], null, null); guardarCache();
@@ -448,12 +454,21 @@ setInterval(() => { if(document.visibilityState==='visible') fsEscuchar(); }, 50
 function mezclarBitacora(filas){
   const pos = new Map(RAW.reg.map((r,i) => [String(r.id), i])), nuevas = [];
   (filas || []).forEach(r => { if(!r || !r.id) return; const k = String(r.id);
-    if(pos.has(k)) RAW.reg[pos.get(k)] = Object.assign({}, RAW.reg[pos.get(k)], r); else { RAW.reg.push(r); nuevas.push(r); } });
+    if(pos.has(k)) RAW.reg[pos.get(k)] = Object.assign({}, RAW.reg[pos.get(k)], r, {_pend:false}); else { RAW.reg.push(r); nuevas.push(r); } });
   armar(); guardarCache();
   const ajenas = nuevas.filter(r => String(r.email||'').toLowerCase()!==email && r.categoria!=='reunion');
   if(ajenas.length){ const u = ajenas.find(r => r.prioridad==='urgente' || r.categoria==='urgente');
     toast(u ? '⚠ Urgente: ' + (u.nombres || u.personal || 'Comunidad') + ' · ' + (u.operador||'') : '🆕 Nueva novedad de ' + (ajenas[ajenas.length-1].operador || 'un compañero'));
     if(u && navigator.vibrate) try { navigator.vibrate([200,100,200]); } catch(e){} }
+}
+// Tareas en tiempo real: la lista de la planilla manda, y se conservan las que este celular todavía está guardando
+function mezclarTareas(filas){
+  if(!Array.isArray(filas)) return;
+  const ids = new Set(filas.map(t => String(t.id)));
+  const antes = JSON.stringify(TAR.map(t => [t.id, t.estado, t.anulado]));
+  RAW.tar = filas.concat(RAW.tar.filter(t => t._pend && !ids.has(String(t.id))));
+  armar(); guardarCache();
+  if(antes !== JSON.stringify(TAR.map(t => [t.id, t.estado, t.anulado])) && typeof V!=='undefined' && V.v!=='tareas') {}
 }
 function fsSalir(){ try { FSC.unsubs.forEach(u=>u()); } catch(x){} FSC.unsubs = []; FSC.ult = {}; FSC.datos = null;
   try { localStorage.removeItem('alas-fs-acc'); sessionStorage.removeItem('alas-fs-acc'); } catch(x){}
@@ -519,7 +534,7 @@ function render(){
 function tarjeta(r, conQuien=true, conDia=false){ const T = TIPOS[tipoDe(r)];
   return `<button class="n${tipoDe(r)==='urgente'?' urg':''}" style="--c:${T.c}" onclick="ver('${esc(r.id)}')">
     <div class="n-h">${conQuien?`<b>${esc(nombreDe(quienDe(r)))}</b>`:''}<span class="t">${r.sistema?'🚪 Egreso':T.i+' '+T.l}</span><span class="hora">${!conQuien||conDia?relDay(r.fecha)+' · ':''}${fh(r.fecha)}</span></div>
-    <p>${esc(r.texto)}</p><small>${r.sistema ? 'Desde la app de Internos' : '✍️ ' + esc(r.operador)}${r.editado ? ' · corregida' : ''}</small></button>`;
+    <p>${esc(r.texto)}</p><small>${r.sistema ? 'Desde la app de Internos' : '✍️ ' + esc(r.operador)}${r.editado ? ' · corregida' : ''}${r._pend ? ' · <span class="pend">⏳ guardando…</span>' : ''}</small></button>`;
 }
 function porDia(lista, conQuien){ let h = '', last = '';
   lista.forEach(r => { const d = relDay(r.fecha); if(d!==last){ h += `<div class="dia">${d}${d==='Hoy'||d==='Ayer' ? ' · ' + fDate(r.fecha) : ''}</div>`; last = d; } h += tarjeta(r, conQuien); }); return h; }
@@ -575,10 +590,13 @@ async function guardar(){
   const rec = { id:nid('b'), fecha:aHoja(new Date()), categoria:f.tipo, prioridad: f.tipo==='urgente' ? 'urgente' : 'normal',
     quien: 'interno', internos: p ? p.id : '', nombres: p ? p.nombre : '', cedulas: p ? p.cedula : '',
     personal: op, texto: f.txt.trim(), operador: miNombre(), email };
-  const b = $('gu'); b.disabled = true; b.textContent = 'Guardando…';
+  // Aparece al instante en tu celular y se guarda en la planilla por detrás
+  const copia = Object.assign({}, f);
+  RAW.reg.push(Object.assign({}, rec, {_pend:true})); closeSheet(); armar(); toast(f.tipo==='urgente' ? '✓ Anotado como urgente' : '✓ Anotado');
   try { await guardarFila(HOJA_BIT, rec, 'Bitácora: ' + (p ? p.nombre : '—') + ' · ' + TIPOS[f.tipo].l, false);
-    RAW.reg.push(rec); closeSheet(); armar(); guardarCache(); toast(f.tipo==='urgente' ? '✓ Guardado como urgente' : '✓ Guardado'); }
-  catch(e){ const er = $('fErr'); er.textContent = errorGuardar(e); er.style.display = 'block'; b.disabled = false; b.textContent = 'Guardar'; }
+    const x = RAW.reg.find(r => String(r.id)===rec.id); if(x) x._pend = false; armar(); guardarCache(); }
+  catch(e){ RAW.reg = RAW.reg.filter(r => String(r.id)!==rec.id); armar();
+    V.f = copia; pintarForm(); $('sheetWrap').hidden = false; const er = $('fErr'); er.textContent = errorGuardar(e) + ' Tu texto sigue acá.'; er.style.display = 'block'; }
 }
 /* dictado por voz (si el celular lo permite; si no, el 🎤 del teclado) */
 let rec = null;
@@ -722,9 +740,9 @@ function vTareas(){
   const hechas = vivas.filter(t => t.estado==='hecho').sort((a,b) => (b.hecha||'').localeCompare(a.hecha||''));   // la última hecha arriba de las hechas
   const quienCuando = s => { const m = String(s||'').match(/^(\d{4}-\d{2}-\d{2}(?: \d{1,2}:\d{2})?)(?: por (.+))?$/); return m ? fDate(fechaDe(m[1])) + (m[2] ? ' · ' + esc(m[2]) : '') : esc(s); };
   const fila = t => `<div class="tarea${t.estado==='hecho'?' hecha':''}">
-    <label class="chk"><input type="checkbox" ${t.estado==='hecho'?'checked':''} onchange="marcarTarea('${esc(t.id)}', this.checked)"><span></span></label>
-    <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}</small></button></div>`;
-  return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecho, tocá el cuadradito y baja al final.</div>
+    <button class="tt" onclick="verTarea('${esc(t.id)}')"><b>${esc(t.titulo)}</b><small>${t.estado==='hecho' ? '✓ Hecha ' + quienCuando(t.hecha) : 'Anotó ' + esc(t.creadapor || '—') + (t.creada ? ' · ' + fDate(fechaDe(t.creada)) : '')}${t._pend ? ' · <span class="pend">⏳ guardando…</span>' : ''}</small></button>
+    ${t.estado==='hecho' ? `<button class="deshacer" onclick="marcarTarea('${esc(t.id)}', false)">↩ Deshacer</button>` : `<button class="hecho" onclick="marcarTarea('${esc(t.id)}', true)">✓ Hecha</button>`}</div>`;
+  return `<div class="ayuda">✅ <b>Tareas de la comunidad:</b> anotá lo que hay que hacer en la casa. Cuando esté hecha, tocá <b>✓ Hecha</b> y baja al final.</div>
   <div class="nueva"><input id="tNueva" placeholder="Nueva tarea… (ej: arreglar la canilla del baño)" onkeydown="if(event.key==='Enter')agregarTarea()"><button class="b p" onclick="agregarTarea()">Agregar</button></div>
   <div class="grp">Para hacer (${pend.length})</div>
   ${pend.map(fila).join('') || '<div class="vacio">No hay nada pendiente 👍</div>'}
@@ -733,16 +751,19 @@ function vTareas(){
 async function agregarTarea(){
   const inp = $('tNueva'), t = inp.value.trim(); if(!t){ inp.focus(); return; }
   const rec = {id:nid('t'), titulo:t, estado:'pendiente', responsable:'', limite:'', origen:'Comunidad', creada:aHoja(new Date()), creadapor:miNombre(), hecha:''};
-  inp.disabled = true;
-  try { await guardarFila(HOJA_TAR, rec, 'Nueva tarea de la comunidad: ' + t.slice(0,80), false); RAW.tar.push(rec); armar(); guardarCache(); toast('✓ Tarea agregada'); }
-  catch(e){ inp.disabled = false; estado(errorGuardar(e), true); }
+  // aparece al instante; se guarda por detrás (así no se carga dos veces)
+  RAW.tar.push(Object.assign({}, rec, {_pend:true})); inp.value = ''; armar(); setTimeout(() => $('tNueva')?.focus(), 30);
+  try { await guardarFila(HOJA_TAR, rec, 'Nueva tarea de la comunidad: ' + t.slice(0,80), false);
+    const x = RAW.tar.find(r => String(r.id)===rec.id); if(x) x._pend = false; armar(); guardarCache(); }
+  catch(e){ RAW.tar = RAW.tar.filter(r => String(r.id)!==rec.id); armar(); const i2 = $('tNueva'); if(i2) i2.value = t; estado(errorGuardar(e), true); }
 }
 async function marcarTarea(id, hecho){
   const t = TAR.find(x => x.id===id); if(!t) return;
   const rec = {id, estado: hecho ? 'hecho' : 'pendiente', hecha: hecho ? aHoja(new Date()) + ' por ' + miNombre() : ''};
-  try { await guardarFila(HOJA_TAR, rec, (hecho ? 'Tarea hecha: ' : 'Tarea vuelve a pendiente: ') + t.titulo.slice(0,80), true);
-    Object.assign(RAW.tar.find(x => String(x.id)===id) || {}, rec); armar(); guardarCache(); toast(hecho ? '✓ Hecha' : 'Vuelve a pendientes'); }
-  catch(e){ render(); estado(errorGuardar(e), true); }
+  const raw = RAW.tar.find(x => String(x.id)===id) || {}, antes = {estado: raw.estado, hecha: raw.hecha};
+  Object.assign(raw, rec); armar(); toast(hecho ? '✓ Hecha' : 'Vuelve a pendientes');          // se ve al instante
+  try { await guardarFila(HOJA_TAR, rec, (hecho ? 'Tarea hecha: ' : 'Tarea vuelve a pendiente: ') + t.titulo.slice(0,80), true); guardarCache(); }
+  catch(e){ Object.assign(raw, antes); armar(); estado(errorGuardar(e), true); }
 }
 function verTarea(id){ const t = TAR.find(x => x.id===id); if(!t) return;
   $('sheet').innerHTML = `<div class="shh"><h2>Tarea<small>Anotó ${esc(t.creadapor || '—')}${t.creada ? ' · ' + fDate(fechaDe(t.creada)) + ' ' + fh(fechaDe(t.creada)) : ''}</small></h2><button class="xx" onclick="closeSheet()">✕</button></div>
