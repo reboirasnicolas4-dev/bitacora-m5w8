@@ -237,7 +237,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER="20261120170500";
+const APP_VER="20261120211500";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -786,6 +786,21 @@ async function activarAvisos(){
 async function probarAvisos(){ try { const r = await api({action:'avisoBitPrueba', tokenAviso:localStorage.getItem('bit-aviso-token')}); toast(r && r.ok ? 'Te mandé un aviso de prueba 🔔' : 'No se pudo mandar la prueba.'); } catch(e){ toast('No se pudo mandar la prueba.'); } }
 async function desactivarAvisos(){ try { await api({action:'avisoBitQuitar', tokenAviso:localStorage.getItem('bit-aviso-token')}); } catch(e){} try { localStorage.removeItem('bit-aviso-token'); } catch(e){} closeSheet(); render(); toast('Avisos desactivados en este celular.'); }
 function noAhora(){ try { localStorage.setItem('bit-aviso-no', String(Date.now())); } catch(e){} render(); }
+/* Si los avisos están activados en este celular, se vuelve a anotar el celular en Google al abrir Bitácora
+   (una vez por día). Así, si el anotado se perdió (por ejemplo al cambiar de app), se arregla solo. */
+async function refrescarAvisos(){
+  try {
+    if(!token || !avisosSoportados() || Notification.permission!=='granted' || !localStorage.getItem('bit-aviso-token')) return;
+    const ult = Number(localStorage.getItem('bit-aviso-ref') || 0); if(Date.now() - ult < 20*3600*1000) return;
+    if(refrescarAvisos.p) return; refrescarAvisos.p = 1;
+    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const m = await fbMensajes(), t = await m.getToken({vapidKey:FB_VAPID, serviceWorkerRegistration:reg});
+    const r = await api({action:'avisoBitGuardar', tokenAviso:t, dispositivo:dispositivo()});
+    if(r && r.ok===true){ localStorage.setItem('bit-aviso-token', t); localStorage.setItem('bit-aviso-ref', String(Date.now())); }
+  } catch(e){} finally { refrescarAvisos.p = 0; }
+}
+setTimeout(refrescarAvisos, 5000); setInterval(refrescarAvisos, 10*60*1000);
+document.addEventListener('visibilitychange', () => { if(document.visibilityState==='visible') setTimeout(refrescarAvisos, 3000); });
 function cartelAvisos(){ let no = 0; try { no = Number(localStorage.getItem('bit-aviso-no') || 0); } catch(e){}
   if(avisosOn() || Date.now() - no < 7*DAY) return '';
   return `<div class="avisos"><b>🔔 Enterate al instante de lo urgente</b><span>Activá los avisos y te llega una notificación cada vez que alguien anota algo urgente.</span><div class="btns"><button class="b s" onclick="noAhora()">Ahora no</button><button class="b p" onclick="activarAvisos()">Activar avisos</button></div></div>`; }
