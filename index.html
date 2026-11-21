@@ -237,7 +237,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER="20261120211500";
+const APP_VER="20261121023500";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -662,7 +662,7 @@ function ver(id){
     ${r.editado ? `<p class="nota">Corregida: ${esc(r.editado)}</p>` : ''}
     ${r.antes ? `<details class="antes"><summary>Ver lo que decía antes</summary><div>${esc(r.antes)}</div></details>` : ''}
     <p class="err" id="vErr"></p><div id="vX"></div>
-    ${puede ? `<div class="btns"><button class="b red" onclick="confirmarAnular('${esc(r.id)}')">Anular</button><button class="b" onclick="corregir('${esc(r.id)}')">Corregir</button></div>` : ''}`;
+    ${puede ? `<div class="btns">${isAdmin() ? `<button class="b red" onclick="confirmarAnular('${esc(r.id)}')">Anular</button>` : ''}<button class="b" onclick="corregir('${esc(r.id)}')">Corregir</button></div>` : ''}`;
   $('sheetWrap').hidden = false; document.body.style.overflow = 'hidden';
 }
 function corregir(id){ const r = REGS.find(x => x.id===id);
@@ -674,8 +674,8 @@ async function guardarCorreccion(id){ const r = REGS.find(x => x.id===id), txt =
   const b = $('gu'); b.disabled = true; b.textContent = 'Guardando…';
   try { await guardarFila(HOJA_BIT, rec, 'Corrigió una nota de la bitácora', true); Object.assign(RAW.reg.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('✓ Corregida'); }
   catch(e){ $('fErr').textContent = errorGuardar(e); $('fErr').style.display = 'block'; b.disabled = false; b.textContent = 'Guardar cambios'; } }
-function confirmarAnular(id){ $('vX').innerHTML = `<div class="confirmar">¿Anular esta nota? No se borra: queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('vX').innerHTML=''">No</button><button class="b red" onclick="anular('${esc(id)}')">Sí, anular</button></div></div>`; }
-async function anular(id){ const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
+function confirmarAnular(id){ if(!isAdmin()) return; $('vX').innerHTML = `<div class="confirmar">¿Anular esta nota? No se borra: queda guardada en la planilla como anulada.<div class="btns"><button class="b" onclick="$('vX').innerHTML=''">No</button><button class="b red" onclick="anular('${esc(id)}')">Sí, anular</button></div></div>`; }
+async function anular(id){ if(!isAdmin()) return; const rec = {id, anulado: aHoja(new Date()) + ' por ' + miNombre()};
   try { await guardarFila(HOJA_BIT, rec, 'Anuló una nota de la bitácora', true); Object.assign(RAW.reg.find(x => String(x.id)===id) || {}, rec); closeSheet(); armar(); guardarCache(); toast('Nota anulada (queda guardada)'); }
   catch(e){ $('vErr').textContent = errorGuardar(e); $('vErr').style.display = 'block'; } }
 
