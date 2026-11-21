@@ -237,7 +237,7 @@ body.confab .app{padding-bottom:150px}
 <datalist id="dlPersonas"></datalist>
 
 <script>
-const APP_VER="20261121023500";
+const APP_VER="20261121024500";
 /* ============================================================
    Bitácora · Alas de Libertad
    - Los internos NO se cargan acá: vienen de Base_Internos (pestañas "Internos" y "Egresados")
@@ -773,12 +773,18 @@ const instalada = () => window.matchMedia('(display-mode: standalone)').matches 
 const avisosSoportados = () => 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
 function avisosOn(){ try { return !!localStorage.getItem('bit-aviso-token') && Notification.permission==='granted'; } catch(e){ return false; } }
 function dispositivo(){ const u = navigator.userAgent; return (/Android/.test(u) ? 'Android' : /iPhone|iPad/.test(u) ? 'iPhone' : /Windows/.test(u) ? 'Windows' : /Mac/.test(u) ? 'Mac' : 'Otro') + (instalada() ? ' · app' : ' · navegador'); }
+/* Los avisos de Bitácora usan el MISMO "receptor" (service worker) que Internos. Las dos apps comparten la
+   misma configuración de Firebase: si cada una pedía su propio receptor, al activar una se anulaba la dirección
+   de la otra y los avisos dejaban de llegar ("borrado"). Con el mismo receptor, las dos usan la misma dirección. */
+async function regAvisos(){ const reg = await navigator.serviceWorker.register('/registro-k7x2/sw.js', {scope:'/registro-k7x2/'});
+  if(!reg.active) await new Promise(ok => { const w = reg.installing || reg.waiting; if(!w) return ok(); w.addEventListener('statechange', () => { if(w.state==='activated') ok(); }); setTimeout(ok, 8000); });
+  return reg; }
 async function fbMensajes(){ await cargarJS(FB_JS+'firebase-app-compat.js'); await cargarJS(FB_JS+'firebase-messaging-compat.js'); if(!firebase.apps.length) firebase.initializeApp(FB_CONF); return firebase.messaging(); }
 async function activarAvisos(){
   if(!avisosSoportados()){ toast(esIOS() && !instalada() ? 'En iPhone primero instalá la app (Compartir → Agregar a inicio) y abrila desde ese ícono.' : 'Este celular no permite avisos.'); return; }
   try { const p = await Notification.requestPermission(); if(p!=='granted'){ toast('No se dio permiso para los avisos.'); return; }
     toast('Activando…');
-    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const reg = await regAvisos();
     const m = await fbMensajes(), t = await m.getToken({vapidKey:FB_VAPID, serviceWorkerRegistration:reg});
     const r = await api({action:'avisoBitGuardar', tokenAviso:t, dispositivo:dispositivo()}); if(!r || r.ok!==true) throw new Error((r && r.error) || 'no se guardó');
     localStorage.setItem('bit-aviso-token', t); closeSheet(); render(); toast('🔔 Avisos activados: te va a llegar lo urgente al instante.');
@@ -791,12 +797,12 @@ function noAhora(){ try { localStorage.setItem('bit-aviso-no', String(Date.now()
 async function refrescarAvisos(){
   try {
     if(!token || !avisosSoportados() || Notification.permission!=='granted' || !localStorage.getItem('bit-aviso-token')) return;
-    const ult = Number(localStorage.getItem('bit-aviso-ref') || 0); if(Date.now() - ult < 20*3600*1000) return;
+    const ult = Number(localStorage.getItem('bit-aviso-ref2') || 0); if(Date.now() - ult < 20*3600*1000) return;
     if(refrescarAvisos.p) return; refrescarAvisos.p = 1;
-    const reg = await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const reg = await regAvisos();
     const m = await fbMensajes(), t = await m.getToken({vapidKey:FB_VAPID, serviceWorkerRegistration:reg});
     const r = await api({action:'avisoBitGuardar', tokenAviso:t, dispositivo:dispositivo()});
-    if(r && r.ok===true){ localStorage.setItem('bit-aviso-token', t); localStorage.setItem('bit-aviso-ref', String(Date.now())); }
+    if(r && r.ok===true){ localStorage.setItem('bit-aviso-token', t); localStorage.setItem('bit-aviso-ref2', String(Date.now())); }
   } catch(e){} finally { refrescarAvisos.p = 0; }
 }
 setTimeout(refrescarAvisos, 5000); setInterval(refrescarAvisos, 10*60*1000);
